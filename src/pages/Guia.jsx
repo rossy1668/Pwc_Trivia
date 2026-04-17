@@ -1,7 +1,9 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function GuiaInteractiva() {
   const [paso, setPaso] = useState(0);
+  const navigate = useNavigate();
 
   const pasos = [
     {
@@ -49,7 +51,7 @@ export default function GuiaInteractiva() {
             {paso < pasos.length - 1 ? (
               <button onClick={siguiente} style={mainBtn}>Entendido, siguiente</button>
             ) : (
-              <button onClick={() => window.location.href='/denuncia'} style={ctaBtn}>
+              <button onClick={() => navigate('/denuncia')} style={ctaBtn}>
                 Ir al Canal de Denuncia →
               </button>
             )}
