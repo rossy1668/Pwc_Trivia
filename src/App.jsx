@@ -11,6 +11,9 @@ import { auth, signOutUser } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
 function Navbar({ user, onSignOut }) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
+
   const logoutButtonStyle = {
     background: "transparent",
     border: "none",
@@ -22,6 +25,10 @@ function Navbar({ user, onSignOut }) {
     textDecoration: "underline"
   };
 
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
+
   return (
     <header id="header">
       <div className="header-inner">
@@ -29,7 +36,18 @@ function Navbar({ user, onSignOut }) {
           <img src="/assets/img/logo-pwc.png" alt="PwC Perú" />
           <span className="header-slogan">"El silencio no protege, el conocimiento sí"</span>
         </div>
-        <nav>
+        <button
+          className="nav-toggle"
+          type="button"
+          aria-label={mobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
+          aria-expanded={mobileMenuOpen}
+          onClick={() => setMobileMenuOpen((open) => !open)}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
+        <nav className={mobileMenuOpen ? "open" : ""}>
           <NavLink to="/home" className={({ isActive }) => (isActive ? "active" : "")}>Inicio</NavLink>
           <NavLink to="/trivia" className={({ isActive }) => (isActive ? "active" : "")}>Trivia</NavLink>
           <NavLink to="/guia" className={({ isActive }) => (isActive ? "active" : "")}>Guía</NavLink>
