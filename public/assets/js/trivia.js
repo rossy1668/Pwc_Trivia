@@ -201,6 +201,17 @@
       document.getElementById('res-puntaje').textContent = `${puntaje} / ${preguntas.length}`;
       document.getElementById('res-perfil').textContent = perfil;
       document.getElementById('res-desc').textContent = desc;
+
+      const resultadoLink = document.getElementById('resultado-link');
+      if (resultadoLink) {
+        if (puntaje < 5) {
+          resultadoLink.href = '/leyes';
+          resultadoLink.textContent = 'Revisar leyes';
+        } else {
+          resultadoLink.href = '/guia';
+          resultadoLink.textContent = 'Ver guía de acción';
+        }
+      }
     }
 
     window.reiniciarTrivia = function() {
