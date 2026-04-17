@@ -22,15 +22,13 @@
   background-position: center;
   display: flex;
   align-items: flex-end;
-  background-color: rgba(0, 0, 0, 0.3);
-  background-blend-mode: multiply;
 }
 
 .home-hero-overlay {
   width: 100%;
   max-width: 640px;
   padding: 38px 40px 50px;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.80) 100%);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.18) 0%, rgba(0, 0, 0, 0.42) 100%);
   color: white;
 }
 
