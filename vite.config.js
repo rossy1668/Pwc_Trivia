@@ -1,7 +1,9 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+const isGithubPages = process.env.GH_PAGES === 'true'
+
 export default defineConfig({
   plugins: [react()],
-  base: '/Pwc_Trivia/',
+  base: isGithubPages ? '/Pwc_Trivia/' : '/',
 })
