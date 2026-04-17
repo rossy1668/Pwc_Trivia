@@ -1,0 +1,135 @@
+.denuncia-page {
+  font-family: 'Inter', sans-serif;
+  background-color: #fcfcfc;
+  min-height: 100vh;
+  padding: 60px 5%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.denuncia-header {
+  text-align: center;
+  margin-bottom: 40px;
+  max-width: 600px;
+}
+
+.denuncia-title {
+  font-size: 32px;
+  font-family: Georgia, serif;
+  font-weight: bold;
+  color: #2d2d2d;
+  margin-bottom: 10px;
+}
+
+.denuncia-subtitle {
+  color: #666;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.denuncia-form-card {
+  background-color: white;
+  width: 100%;
+  max-width: 600px;
+  padding: 45px;
+  border-radius: 12px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+  border-top: 6px solid #D04A02;
+}
+
+.denuncia-info-box {
+  background-color: #FFF9E6;
+  padding: 15px 20px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #856404;
+  border: 1px solid #ffeeba;
+  margin-bottom: 30px;
+}
+
+.denuncia-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.denuncia-field {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.denuncia-label {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.denuncia-input,
+.denuncia-textarea,
+.denuncia-select {
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+  outline: none;
+}
+
+.denuncia-textarea {
+  height: 120px;
+  resize: none;
+}
+
+.denuncia-submit-btn {
+  width: 100%;
+  padding: 16px;
+  background-color: #D04A02;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.denuncia-alert {
+  margin-bottom: 18px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.denuncia-success {
+  background-color: #E6FFED;
+  color: #1F5138;
+  border: 1px solid #B7F2C4;
+}
+
+.denuncia-error {
+  background-color: #FFD6D6;
+  color: #7A1D1D;
+  border: 1px solid #FFB2B2;
+}
+
+@media (max-width: 768px) {
+  .denuncia-form-card {
+    padding: 32px;
+  }
+
+  .denuncia-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .denuncia-page {
+    padding: 40px 4%;
+  }
+
+  .denuncia-form-card {
+    padding: 24px;
+  }
+}
