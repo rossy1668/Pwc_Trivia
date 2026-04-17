@@ -1,6 +1,8 @@
 import { useState } from "react";
 import "../assets/css/leyes.css";
 
+const basePath = import.meta.env.BASE_URL;
+
 const cards = [
   { tag: "Art. 4", title: "¿Qué es hostigamiento sexual?", text: "Conducta de naturaleza sexual o sexista no deseada que afecta la dignidad de la persona y crea un entorno intimidatorio, hostil o humillante." },
   { tag: "Art. 5", title: "Conductas tipificadas", text: "Promesas de beneficios laborales, amenazas, uso de lenguaje con contenido sexual, gestos, contacto físico no deseado y cualquier conducta de connotación sexual no solicitada." },
@@ -28,7 +30,7 @@ export default function Leyes() {
   return (
     <div>
       <section id="leyes-hero">
-        <img src="/assets/img/leyes-hero.jpg" alt="Personas en una reunión profesional revisando documentos legales" />
+        <img src={`${basePath}assets/img/leyes-hero.jpg`} alt="Personas en una reunión profesional revisando documentos legales" />
         <div className="hero-overlay" />
         <h1 className="hero-title">Lo que dice la Ley</h1>
       </section>

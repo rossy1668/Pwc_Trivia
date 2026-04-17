@@ -1,5 +1,5 @@
 ﻿import { useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route, NavLink, useLocation, useNavigate, Navigate } from "react-router-dom";
+import { HashRouter, Routes, Route, NavLink, useLocation, useNavigate, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Trivia from "./pages/Trivia";
 import Guia from "./pages/Guia";
@@ -9,6 +9,8 @@ import Login from "./pages/Login";
 import Footer from "./components/Footer";
 import { auth, signOutUser } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
+
+const basePath = import.meta.env.BASE_URL;
 
 function Navbar({ user, onSignOut }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -33,7 +35,7 @@ function Navbar({ user, onSignOut }) {
     <header id="header">
       <div className="header-inner">
         <div className="header-logo">
-          <img src="/assets/img/logo-pwc.png" alt="PwC Perú" />
+          <img src={`${basePath}assets/img/logo-pwc.png`} alt="PwC Perú" />
           <span className="header-slogan">"El silencio no protege, el conocimiento sí"</span>
         </div>
         <button
@@ -109,8 +111,8 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <AppRoutes />
-    </BrowserRouter>
+    </HashRouter>
   );
 }

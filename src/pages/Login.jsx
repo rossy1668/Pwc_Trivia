@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import '../assets/css/login.css';
 import { signInWithEmail, signInWithGoogle } from '../firebase';
 
+const basePath = import.meta.env.BASE_URL;
+
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -58,7 +60,7 @@ export default function Login() {
 
       <div className="login-right">
         <div className="login-header">
-          <img src="/assets/img/logo-pwc.png" alt="PwC Perú" />
+          <img src={`${basePath}assets/img/logo-pwc.png`} alt="PwC Perú" />
           <div className="slogan">"El silencio no protege, el conocimiento sí"</div>
         </div>
 
