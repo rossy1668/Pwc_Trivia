@@ -1,0 +1,224 @@
+/* =============================================
+   LEYES.CSS — Estilos exclusivos página Leyes
+   Proyecto: Respeto Sin Excepciones — PwC Perú
+   ============================================= */
+
+/* ── Hero de Leyes ── */
+#leyes-hero {
+  position: relative;
+  width: 100%;
+  height: 420px;
+  overflow: hidden;
+}
+
+#leyes-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+#leyes-hero .hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom,
+      rgba(0, 0, 0, 0.15) 0%,
+      rgba(0, 0, 0, 0.55) 100%);
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #D04A02;
+  backdrop-filter: blur(8px);
+}
+
+#leyes-hero .hero-title {
+  position: absolute;
+  bottom: 32px;
+  right: 40px;
+  font-family: var(--font-title);
+  font-size: 2.4rem;
+  color: var(--pwc-white);
+  font-style: italic;
+  font-weight: 700;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Sección de texto principal ── */
+#leyes-content {
+  padding: 48px 24px;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+#leyes-content p {
+  font-size: 1rem;
+  color: var(--pwc-text);
+  line-height: 1.9;
+  text-align: justify;
+}
+
+/* ── Destacado naranja ── */
+#leyes-highlight {
+  background-color: var(--pwc-orange);
+  border-radius: 40px;
+  padding: 20px 40px;
+  margin: 32px auto;
+  max-width: 720px;
+  text-align: center;
+}
+
+#leyes-highlight p {
+  color: var(--pwc-white);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+/* ── Tarjetas de artículos de la ley ── */
+#leyes-cards {
+  padding: 40px 24px;
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+#leyes-cards h2 {
+  font-size: 1.6rem;
+  margin-bottom: 24px;
+  color: var(--pwc-dark);
+}
+
+#leyes-cards .cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+#leyes-cards .card {
+  border: 1px solid #e0e0e0;
+  border-radius: var(--radius);
+  padding: 24px;
+  transition: box-shadow var(--transition);
+}
+
+#leyes-cards .card:hover {
+  box-shadow: var(--shadow);
+}
+
+#leyes-cards .card .card-tag {
+  display: inline-block;
+  background-color: var(--pwc-red);
+  color: var(--pwc-white);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+#leyes-cards .card h3 {
+  font-size: 1rem;
+  margin-bottom: 8px;
+  color: var(--pwc-dark);
+}
+
+#leyes-cards .card p {
+  font-size: 0.88rem;
+  color: var(--pwc-muted);
+  line-height: 1.6;
+}
+
+/* ── Acordeón de derechos ── */
+#leyes-accordion {
+  padding: 40px 24px;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+#leyes-accordion h2 {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+
+.accordion-item {
+  border-bottom: 1px solid #ddd;
+}
+
+.accordion-btn {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 16px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--pwc-dark);
+  text-align: left;
+  transition: color var(--transition);
+}
+
+.accordion-btn:hover {
+  color: var(--pwc-red);
+}
+
+.accordion-btn .icon {
+  font-size: 1.2rem;
+  color: var(--pwc-orange);
+  transition: transform var(--transition);
+}
+
+.accordion-btn.open .icon {
+  transform: rotate(45deg);
+}
+
+.accordion-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+
+.accordion-body p {
+  padding: 0 0 16px;
+  font-size: 0.9rem;
+  color: var(--pwc-muted);
+  line-height: 1.7;
+}
+
+/* ── Responsive leyes ── */
+@media (max-width: 768px) {
+  #leyes-hero {
+    height: 280px;
+  }
+
+  #leyes-hero {
+    font-size: 1.6rem;
+    bottom: 20px;
+    right: 20px;
+  }
+
+  .hero-title {
+    font-size: 5.6rem;
+    bottom: 20px;
+    right: 20px;
+  }
+
+  #leyes-cards .cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #leyes-highlight {
+    padding: 16px 24px;
+    border-radius: 20px;
+  }
+}
