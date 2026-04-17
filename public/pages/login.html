@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Iniciar sesión — Respeto Sin Excepciones | PwC Perú</title>
+  <link rel="stylesheet" href="../assets/css/main.css"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      height: 100vh;
+      display: flex;
+      align-items: stretch;
+    }
+
+    /* ── Lado izquierdo — imagen ── */
+    #login-left {
+      flex: 1;
+      background-image: url('../assets/img/trivia-bg.jpg');
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      display: none;
+    }
+
+    #login-left::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.25);
+    }
+
+    /* ── Lado derecho — formulario ── */
+    #login-right {
+      width: 100%;
+      max-width: 480px;
+      padding: 48px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: #fff;
+    }
+
+    #login-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 40px;
+    }
+
+    #login-header img {
+      height: 32px;
+    }
+
+    #login-header .slogan {
+      font-size: 0.78rem;
+      color: #666;
+      font-style: italic;
+      max-width: 160px;
+      line-height: 1.3;
+    }
+
+    #login-right h1 {
+      font-family: 'Georgia', serif;
+      font-size: 1.8rem;
+      color: #2D2D2D;
+      margin-bottom: 6px;
+    }
+
+    #login-right .subtitle {
+      font-size: 0.88rem;
+      color: #888;
+      margin-bottom: 28px;
+    }
+
+    /* Campos */
+    .field {
+      margin-bottom: 18px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #2D2D2D;
+      margin-bottom: 6px;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-family: 'Arial', sans-serif;
+      color: #2D2D2D;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    .field input:focus {
+      border-color: #E0301E;
+    }
+
+    /* Recordar / olvidé */
+    .field-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+      font-size: 0.85rem;
+    }
+
+    .field-row label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #555;
+      cursor: pointer;
+    }
+
+    .field-row a {
+      color: #E0301E;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .field-row a:hover { text-decoration: underline; }
+
+    /* Botón Sign In */
+    #btn-signin {
+      width: 100%;
+      padding: 13px;
+      background: #D04A02;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Arial', sans-serif;
+      transition: background 0.2s;
+      margin-bottom: 14px;
+    }
+
+    #btn-signin:hover { background: #E0301E; }
+
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #e0e0e0;
+    }
+
+    .divider span {
+      font-size: 0.8rem;
+      color: #aaa;
+    }
+
+    /* Botón Google */
+    #btn-google {
+      width: 100%;
+      padding: 12px;
+      background: #fff;
+      color: #2D2D2D;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: background 0.2s, border-color 0.2s;
+      margin-bottom: 24px;
+    }
+
+    #btn-google:hover {
+      background: #f5f5f5;
+      border-color: #bbb;
+    }
+
+    #btn-google svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    /* Sign up */
+    .signup-row {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #888;
+    }
+
+    .signup-row a {
+      color: #E0301E;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .signup-row a:hover { text-decoration: underline; }
+
+    /* Error mensaje */
+    #error-msg {
+      display: none;
+      background: #fff0ee;
+      border: 1px solid #E0301E;
+      color: #c0392b;
+      font-size: 0.85rem;
+      padding: 10px 14px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+    }
+
+    /* Loading spinner dentro del botón */
+    .btn-loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    /* Responsive — mostrar imagen en pantallas grandes */
+    @media (min-width: 900px) {
+      #login-left { display: block; }
+      #login-right { max-width: 460px; }
+    }
+
+    @media (max-width: 480px) {
+      #login-right { padding: 32px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Lado izquierdo — imagen de fondo -->
+  <div id="login-left"></div>
+
+  <!-- Lado derecho — formulario -->
+  <div id="login-right">
+
+    <!-- Logo + slogan -->
+    <div id="login-header">
+      <img src="../assets/img/logo-pwc.png" alt="PwC Perú"/>
+      <span class="slogan">"El silencio no protege, el conocimiento sí"</span>
+    </div>
+
+    <h1>Welcome back</h1>
+    <p class="subtitle">Please enter your details</p>
+
+    <!-- Error -->
+    <div id="error-msg"></div>
+
+    <!-- Email -->
+    <div class="field">
+      <label for="email">Email address</label>
+      <input type="email" id="email" placeholder="tucorreo@pwc.com" autocomplete="email"/>
+    </div>
+
+    <!-- Password -->
+    <div class="field">
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="••••••••" autocomplete="current-password"/>
+    </div>
+
+    <!-- Recordar + olvidé -->
+    <div class="field-row">
+      <label>
+        <input type="checkbox" id="remember"/> Remember for 30 days
+      </label>
+      <a href="#">Forgot password</a>
+    </div>
+
+    <!-- Botón principal -->
+    <button id="btn-signin">Sign in</button>
+
+    <!-- Divider -->
+    <div class="divider"><span>or</span></div>
+
+    <!-- Google -->
+    <button id="btn-google">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+      Sign in with Google
+    </button>
+
+    <!-- Registro -->
+    <div class="signup-row">
+      Don't have an account? <a href="#" id="link-signup">Sign up</a>
+    </div>
+
+  </div>
+
+
+  <!-- FIREBASE -->
+  <script type="module" src="../assets/js/firebase.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      signInWithPopup,
+      GoogleAuthProvider,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      setDoc,
+      getDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // ── Config Firebase ──
+    const firebaseConfig = {
+      apiKey: "AIzaSyCmKuHHsxJRss0n7J4z5SxEgof2Syabuog",
+      authDomain: "triviapwc.firebaseapp.com",
+      projectId: "triviapwc",
+      storageBucket: "triviapwc.firebasestorage.app",
+      messagingSenderId: "588221102437",
+      appId: "1:588221102437:web:776bd6ae86d3f2aa8ac98c"
+    };
+
+    const app      = initializeApp(firebaseConfig);
+    const auth     = getAuth(app);
+    const db       = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    // Si ya está logueado, redirigir directo
+    onAuthStateChanged(auth, user => {
+      if (user) window.location.href = '/';
+    });
+
+    // Guardar usuario en Firestore
+    async function guardarUsuario(user) {
+      const ref = doc(db, "usuarios", user.uid);
+      const existe = await getDoc(ref);
+      if (!existe.exists()) {
+        await setDoc(ref, {
+          nombre: user.displayName || '',
+          email: user.email || '',
+          fotoURL: user.photoURL || '',
+          fechaRegistro: serverTimestamp(),
+          ultimoAcceso: serverTimestamp()
+        });
+      } else {
+        await setDoc(ref, { ultimoAcceso: serverTimestamp() }, { merge: true });
+      }
+    }
+
+    // Mostrar error
+    function mostrarError(msg) {
+      const el = document.getElementById('error-msg');
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+
+    function ocultarError() {
+      document.getElementById('error-msg').style.display = 'none';
+    }
+
+    // ── Sign in con email/password ──
+    let modoRegistro = false;
+
+    document.getElementById('btn-signin').addEventListener('click', async () => {
+      ocultarError();
+      const email    = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const btn      = document.getElementById('btn-signin');
+
+      if (!email || !password) {
+        mostrarError('Por favor completa todos los campos.');
+        return;
+      }
+
+      btn.classList.add('btn-loading');
+      btn.textContent = modoRegistro ? 'Creando cuenta...' : 'Ingresando...';
+
+      try {
+        let cred;
+        if (modoRegistro) {
+          cred = await createUserWithEmailAndPassword(auth, email, password);
+        } else {
+          cred = await signInWithEmailAndPassword(auth, email, password);
+        }
+        await guardarUsuario(cred.user);
+        window.location.href = '/';
+      } catch (err) {
+        btn.classList.remove('btn-loading');
+        btn.textContent = modoRegistro ? 'Create account' : 'Sign in';
+
+        const errores = {
+          'auth/user-not-found':    'No existe una cuenta con ese correo. ¿Quieres registrarte?',
+          'auth/wrong-password':    'Contraseña incorrecta. Intenta de nuevo.',
+          'auth/invalid-email':     'El correo no tiene un formato válido.',
+          'auth/email-already-in-use': 'Ya existe una cuenta con ese correo. Inicia sesión.',
+          'auth/weak-password':     'La contraseña debe tener al menos 6 caracteres.',
+          'auth/invalid-credential': 'Correo o contraseña incorrectos.',
+        };
+        mostrarError(errores[err.code] || 'Ocurrió un error. Intenta de nuevo.');
+      }
+    });
+
+    // ── Sign in con Google ──
+    document.getElementById('btn-google').addEventListener('click', async () => {
+      ocultarError();
+      try {
+        const result = await signInWithPopup(auth, provider);
+        await guardarUsuario(result.user);
+        window.location.href = '/';
+      } catch (err) {
+        if (err.code !== 'auth/popup-closed-by-user') {
+          mostrarError('No se pudo iniciar sesión con Google. Intenta de nuevo.');
+        }
+      }
+    });
+
+    // ── Toggle registro / login ──
+    document.getElementById('link-signup').addEventListener('click', (e) => {
+      e.preventDefault();
+      modoRegistro = !modoRegistro;
+      const btn = document.getElementById('btn-signin');
+      const h1  = document.querySelector('#login-right h1');
+      const sub = document.querySelector('#login-right .subtitle');
+      const link = document.getElementById('link-signup');
+      const row  = document.querySelector('.signup-row');
+
+      if (modoRegistro) {
+        h1.textContent   = 'Create account';
+        sub.textContent  = 'Enter your details to register';
+        btn.textContent  = 'Create account';
+        row.innerHTML    = 'Already have an account? <a href="#" id="link-signup">Sign in</a>';
+      } else {
+        h1.textContent   = 'Welcome back';
+        sub.textContent  = 'Please enter your details';
+        btn.textContent  = 'Sign in';
+        row.innerHTML    = "Don't have an account? <a href='#' id='link-signup'>Sign up</a>";
+      }
+
+      // Re-bind del link
+      document.getElementById('link-signup').addEventListener('click', arguments.callee);
+      ocultarError();
+    });
+
+    // Enter para submit
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('btn-signin').click();
+    });
+  </script>
+
+</body>
+</html>

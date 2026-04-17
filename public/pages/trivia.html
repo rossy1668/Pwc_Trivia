@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Trivia — Respeto Sin Excepciones | PwC Perú</title>
+  <link rel="stylesheet" href="../assets/css/main.css"/>
+  <link rel="stylesheet" href="../assets/css/trivia.css"/>
+</head>
+<body>
+
+  <!-- Loading -->
+  <div id="loading">
+    <div class="spinner"></div>
+    <p>Conectando con Firebase...</p>
+  </div>
+
+  <!-- HEADER -->
+  <header id="header">
+    <div class="header-inner">
+      <div class="header-logo">
+        <img src="../assets/img/logo-pwc.png" alt="PwC Perú"/>
+        <span class="header-slogan">"El silencio no protege, el conocimiento sí"</span>
+      </div>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Abrir menú">
+        <span></span><span></span><span></span>
+      </button>
+      <nav id="main-nav">
+        <a href="../index.html">Inicio</a>
+        <a href="trivia.html" class="active">Trivia</a>
+        <a href="/guia">Guía</a>
+        <a href="leyes.html">Leyes</a>
+        <a href="/denuncia">Denuncia</a>
+      </nav>
+    </div>
+  </header>
+
+
+  <!-- TRIVIA -->
+  <section id="trivia-section">
+    <div id="trivia-bg"></div>
+
+    <div id="progress-bar-wrap">
+      <div id="progress-bar">
+        <div id="progress-fill"></div>
+      </div>
+    </div>
+
+    <div id="trivia-card">
+      <p id="trivia-label">Pregunta 1 de 10</p>
+      <h2 id="trivia-question"></h2>
+      <div class="trivia-options" id="trivia-options"></div>
+      <div id="trivia-feedback"></div>
+      <button id="btn-siguiente">Siguiente pregunta →</button>
+    </div>
+  </section>
+
+
+  <!-- RESULTADOS -->
+  <section id="resultado-section">
+    <div class="resultado-card">
+      <div class="resultado-emoji" id="res-emoji">🏆</div>
+      <div class="resultado-puntaje" id="res-puntaje">0 / 10</div>
+      <div class="resultado-perfil" id="res-perfil"></div>
+      <p class="resultado-desc" id="res-desc"></p>
+      <div class="resultado-btns">
+        <button class="btn btn-primary" onclick="reiniciarTrivia()">Jugar de nuevo</button>
+        <a href="/guia" class="btn btn-outline">Ver guía de acción</a>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- FOOTER -->
+  <footer id="footer">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h4>Navegación</h4>
+        <ul>
+          <li><a href="/">Inicio</a></li>
+          <li><a href="trivia.html">Trivia</a></li>
+          <li><a href="/guia">Guía de acción</a></li>
+          <li><a href="leyes.html">Leyes</a></li>
+          <li><a href="/denuncia">Denuncia</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Sobre el proyecto</h4>
+        <ul>
+          <li><a href="#">Acerca de este micrositio</a></li>
+          <li><a href="#">¿Qué es el hostigamiento?</a></li>
+          <li><a href="#">Política de confidencialidad</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Recursos legales</h4>
+        <ul>
+          <li><a href="#">Ley N° 27942</a></li>
+          <li><a href="#">Reglamento vigente</a></li>
+          <li><a href="#">Derechos del colaborador</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Contacto PwC</h4>
+        <ul>
+          <li><a href="#">Canal de denuncias oficial</a></li>
+          <li><a href="#">Área de Recursos Humanos</a></li>
+          <li><a href="#">Ética y Cumplimiento</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      © 2025 Micrositio desarrollado para PwC Perú — Hackathon +ChicasTec |
+      "El silencio no protege, el conocimiento sí."
+    </div>
+  </footer>
+
+
+  <!-- FIREBASE SDK -->
+  <script type="module" src="../assets/js/firebase.js"></script>
+
+  <script src="../assets/js/trivia.js"></script>
+
+</body>
+</html>
