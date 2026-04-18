@@ -64,12 +64,30 @@ export async function saveTriviaResult(score, total) {
 
 export async function uploadDenunciaFiles(denunciaId, files) {
   const uploadedFiles = [];
+  const maxSize = 10 * 1024 * 1024; // 10MB por archivo
 
-  for (const file of files) {
-    const fileRef = storageRef(storage, `denuncias/${denunciaId}/${Date.now()}-${file.name}`);
-    await uploadBytes(fileRef, file);
-    const url = await getDownloadURL(fileRef);
-    uploadedFiles.push({ name: file.name, url });
+  try {
+    for (const file of files) {
+      if (file.size > maxSize) {
+        throw new Error(`Archivo ${file.name} demasiado grande. Máximo 10MB.`);
+      }
+
+      try {
+        const fileRef = storageRef(storage, `denuncias/${denunciaId}/${Date.now()}-${file.name}`);
+        const uploadTask = uploadBytes(fileRef, file);
+        
+        await uploadTask;
+        
+        const url = await getDownloadURL(fileRef);
+        uploadedFiles.push({ name: file.name, url });
+      } catch (fileError) {
+        console.error(`Error subiendo ${file.name}:`, fileError);
+        throw new Error(`No se pudo subir ${file.name}. ${fileError.message}`);
+      }
+    }
+  } catch (error) {
+    console.error("Error en uploadDenunciaFiles:", error);
+    throw error;
   }
 
   return uploadedFiles;

@@ -66,6 +66,18 @@ export default function Denuncia({ user }) {
       return;
     }
 
+    if (attachments.length > 0) {
+      const maxSizeMB = 10;
+      const maxSizeBytes = maxSizeMB * 1024 * 1024;
+      
+      for (const file of attachments) {
+        if (file.size > maxSizeBytes) {
+          setError(`El archivo "${file.name}" excede el límite de ${maxSizeMB}MB. Por favor reduce el tamaño.`);
+          return;
+        }
+      }
+    }
+
     setLoading(true);
 
     try {
@@ -73,8 +85,15 @@ export default function Denuncia({ user }) {
       const caso = reference.id.slice(0, 8).toUpperCase();
       let uploadedFiles = [];
 
-      if (attachments.length) {
-        uploadedFiles = await uploadDenunciaFiles(reference.id, attachments);
+      if (attachments.length > 0) {
+        try {
+          uploadedFiles = await uploadDenunciaFiles(reference.id, attachments);
+        } catch (uploadError) {
+          console.error("Error en upload:", uploadError);
+          setError(`Error al subir archivos: ${uploadError.message || "Intenta con archivos más pequeños"}`);
+          setLoading(false);
+          return;
+        }
       }
 
       await submitDenuncia(
@@ -99,8 +118,12 @@ export default function Denuncia({ user }) {
       setResponsable("");
       setDescripcion("");
       setAttachments([]);
-      await loadDenuncias();
+      
+      if (isHrUser) {
+        await loadDenuncias();
+      }
     } catch (error) {
+      console.error("Error enviando denuncia:", error);
       setError(error.message || "Error al enviar la denuncia. Intenta nuevamente.");
     } finally {
       setLoading(false);
@@ -109,144 +132,149 @@ export default function Denuncia({ user }) {
 
   return (
     <div className="denuncia-page">
-      <div className="denuncia-header">
-        <h1 className="denuncia-title">Nueva Denuncia</h1>
-        <p className="denuncia-subtitle">Su reporte será procesado con total confidencialidad.</p>
-      </div>
-
-      <div className="denuncia-form-card">
-        <div className="denuncia-info-box">
-          <strong>Aviso de sistema:</strong> Al enviar este formulario, recibirás un número de caso y la denuncia quedará registrada para seguimiento.
-          <br />
-          Si prefieres, también puedes enviar un correo a <a href="mailto:denuncias@pwc.com?subject=Denuncia%20PwC">denuncias@pwc.com</a> con los detalles.
-        </div>
-
-        {message && <div className="denuncia-alert denuncia-success">{message}</div>}
-        {error && <div className="denuncia-alert denuncia-error">{error}</div>}
-
-        <form onSubmit={handleSubmit}>
-          <div className="denuncia-field">
-            <label className="denuncia-label">Modalidad</label>
-            <select className="denuncia-select" value={modalidad} onChange={(event) => setModalidad(event.target.value)}>
-              <option>Anónimo (Protección contra represalias)</option>
-              <option>Identificado</option>
-            </select>
+      {isHrUser ? (
+        <>
+          <div className="denuncia-header">
+            <h1 className="denuncia-title">Panel de denuncias</h1>
+            <p className="denuncia-subtitle">Consulta los reportes registrados por los empleados.</p>
           </div>
 
-          <div className="denuncia-row">
-            <div className="denuncia-field">
-              <label className="denuncia-label">Línea de Servicio</label>
-              <input
-                className="denuncia-input"
-                value={lineaServicio}
-                onChange={(event) => setLineaServicio(event.target.value)}
-                placeholder="Ej: Auditoría"
-              />
-            </div>
-            <div className="denuncia-field">
-              <label className="denuncia-label">Cargo</label>
-              <input
-                className="denuncia-input"
-                value={cargo}
-                onChange={(event) => setCargo(event.target.value)}
-                placeholder="Tu posición"
-              />
-            </div>
-          </div>
-
-          <div className="denuncia-row">
-            <div className="denuncia-field">
-              <label className="denuncia-label">Área del Incidente</label>
-              <input
-                className="denuncia-input"
-                value={areaIncidente}
-                onChange={(event) => setAreaIncidente(event.target.value)}
-                placeholder="¿Dónde ocurrió?"
-              />
-            </div>
-            <div className="denuncia-field">
-              <label className="denuncia-label">Persona o área responsable</label>
-              <input
-                className="denuncia-input"
-                value={responsable}
-                onChange={(event) => setResponsable(event.target.value)}
-                placeholder="Responsable"
-              />
-            </div>
-          </div>
-
-          <div className="denuncia-field">
-            <label className="denuncia-label">Descripción de los hechos</label>
-            <textarea
-              className="denuncia-textarea"
-              value={descripcion}
-              onChange={(event) => setDescripcion(event.target.value)}
-              placeholder="Describe lo sucedido con el mayor detalle posible..."
-            />
-          </div>
-
-          <div className="denuncia-field">
-            <label className="denuncia-label">Archivos adjuntos</label>
-            <input
-              className="denuncia-input"
-              type="file"
-              accept="image/*,.pdf,.doc,.docx,.txt"
-              multiple
-              onChange={handleAttachmentChange}
-            />
-            {attachments.length > 0 && (
-              <div className="denuncia-attachment-list">
-                {attachments.map((file) => (
-                  <span key={file.name} className="denuncia-attachment-item">{file.name}</span>
+          <div className="denuncia-panel-card">
+            {denuncias.length === 0 ? (
+              <div className="denuncia-alert denuncia-info">No hay denuncias registradas todavía.</div>
+            ) : (
+              <div className="denuncia-panel-list">
+                {denuncias.map((denunciaItem) => (
+                  <article key={denunciaItem.id} className="denuncia-panel-item">
+                    <div className="denuncia-panel-meta">
+                      <span className="denuncia-panel-case">Caso #{denunciaItem.caseNumber || denunciaItem.id.slice(0, 8).toUpperCase()}</span>
+                      <span className="denuncia-panel-date">{formatTimestamp(denunciaItem.fecha)}</span>
+                    </div>
+                    <p className="denuncia-panel-field"><strong>Modalidad:</strong> {denunciaItem.modalidad}</p>
+                    <p className="denuncia-panel-field"><strong>Área incidente:</strong> {denunciaItem.areaIncidente || 'No indicado'}</p>
+                    <p className="denuncia-panel-field"><strong>Responsable:</strong> {denunciaItem.responsable || 'No indicado'}</p>
+                    <p className="denuncia-panel-field"><strong>Descripción:</strong> {denunciaItem.descripcion}</p>
+                    {denunciaItem.attachments?.length > 0 && (
+                      <div className="denuncia-panel-attachments">
+                        <strong>Adjuntos:</strong>
+                        <ul>
+                          {denunciaItem.attachments.map((file) => (
+                            <li key={file.url}>
+                              <a href={file.url} target="_blank" rel="noreferrer">{file.name}</a>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </article>
                 ))}
               </div>
             )}
           </div>
-
-          <button className="denuncia-submit-btn" type="submit" disabled={loading}>
-            {loading ? 'Enviando...' : 'Enviar reporte'}
-          </button>
-        </form>
-      </div>
-
-      {isHrUser && (
-        <div className="denuncia-panel-card">
-          <div className="denuncia-panel-header">
-            <h2>Panel de denuncias</h2>
-            <p>Consulta los reportes que han sido registrados.</p>
+        </>
+      ) : (
+        <>
+          <div className="denuncia-header">
+            <h1 className="denuncia-title">Nueva Denuncia</h1>
+            <p className="denuncia-subtitle">Su reporte será procesado con total confidencialidad.</p>
           </div>
 
-          {denuncias.length === 0 ? (
-            <div className="denuncia-alert denuncia-info">No hay denuncias registradas todavía.</div>
-          ) : (
-            <div className="denuncia-panel-list">
-              {denuncias.map((denunciaItem) => (
-                <article key={denunciaItem.id} className="denuncia-panel-item">
-                  <div className="denuncia-panel-meta">
-                    <span className="denuncia-panel-case">Caso #{denunciaItem.caseNumber || denunciaItem.id.slice(0, 8).toUpperCase()}</span>
-                    <span className="denuncia-panel-date">{formatTimestamp(denunciaItem.fecha)}</span>
-                  </div>
-                  <p className="denuncia-panel-field"><strong>Modalidad:</strong> {denunciaItem.modalidad}</p>
-                  <p className="denuncia-panel-field"><strong>Área incidente:</strong> {denunciaItem.areaIncidente || 'No indicado'}</p>
-                  <p className="denuncia-panel-field"><strong>Responsable:</strong> {denunciaItem.responsable || 'No indicado'}</p>
-                  <p className="denuncia-panel-field"><strong>Descripción:</strong> {denunciaItem.descripcion}</p>
-                  {denunciaItem.attachments?.length > 0 && (
-                    <div className="denuncia-panel-attachments">
-                      <strong>Adjuntos:</strong>
-                      <ul>
-                        {denunciaItem.attachments.map((file) => (
-                          <li key={file.url}>
-                            <a href={file.url} target="_blank" rel="noreferrer">{file.name}</a>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </article>
-              ))}
+          <div className="denuncia-form-card">
+            <div className="denuncia-info-box">
+              <strong>Aviso de sistema:</strong> Al enviar este formulario, recibirás un número de caso y la denuncia quedará registrada para seguimiento.
+              <br />
+              Si prefieres, también puedes enviar un correo a <a href="mailto:denuncias@pwc.com?subject=Denuncia%20PwC">denuncias@pwc.com</a> con los detalles.
             </div>
-          )}
-        </div>
+
+            {message && <div className="denuncia-alert denuncia-success">{message}</div>}
+            {error && <div className="denuncia-alert denuncia-error">{error}</div>}
+
+            <form onSubmit={handleSubmit}>
+              <div className="denuncia-field">
+                <label className="denuncia-label">Modalidad</label>
+                <select className="denuncia-select" value={modalidad} onChange={(event) => setModalidad(event.target.value)}>
+                  <option>Anónimo (Protección contra represalias)</option>
+                  <option>Identificado</option>
+                </select>
+              </div>
+
+              <div className="denuncia-row">
+                <div className="denuncia-field">
+                  <label className="denuncia-label">Línea de Servicio</label>
+                  <input
+                    className="denuncia-input"
+                    value={lineaServicio}
+                    onChange={(event) => setLineaServicio(event.target.value)}
+                    placeholder="Ej: Auditoría"
+                  />
+                </div>
+                <div className="denuncia-field">
+                  <label className="denuncia-label">Cargo</label>
+                  <input
+                    className="denuncia-input"
+                    value={cargo}
+                    onChange={(event) => setCargo(event.target.value)}
+                    placeholder="Tu posición"
+                  />
+                </div>
+              </div>
+
+              <div className="denuncia-row">
+                <div className="denuncia-field">
+                  <label className="denuncia-label">Área del Incidente</label>
+                  <input
+                    className="denuncia-input"
+                    value={areaIncidente}
+                    onChange={(event) => setAreaIncidente(event.target.value)}
+                    placeholder="¿Dónde ocurrió?"
+                  />
+                </div>
+                <div className="denuncia-field">
+                  <label className="denuncia-label">Persona o área responsable</label>
+                  <input
+                    className="denuncia-input"
+                    value={responsable}
+                    onChange={(event) => setResponsable(event.target.value)}
+                    placeholder="Responsable"
+                  />
+                </div>
+              </div>
+
+              <div className="denuncia-field">
+                <label className="denuncia-label">Descripción de los hechos</label>
+                <textarea
+                  className="denuncia-textarea"
+                  value={descripcion}
+                  onChange={(event) => setDescripcion(event.target.value)}
+                  placeholder="Describe lo sucedido con el mayor detalle posible..."
+                />
+              </div>
+
+              <div className="denuncia-field">
+                <label className="denuncia-label">Archivos adjuntos (opcional)</label>
+                <input
+                  className="denuncia-input"
+                  type="file"
+                  accept="image/*,.pdf,.doc,.docx,.txt"
+                  multiple
+                  onChange={handleAttachmentChange}
+                  disabled={loading}
+                />
+                {attachments.length > 0 && (
+                  <div className="denuncia-attachment-list">
+                    {attachments.map((file) => (
+                      <span key={file.name} className="denuncia-attachment-item">{file.name}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <button className="denuncia-submit-btn" type="submit" disabled={loading}>
+                {loading ? 'Enviando...' : 'Enviar reporte'}
+              </button>
+            </form>
+          </div>
+        </>
       )}
     </div>
   );
