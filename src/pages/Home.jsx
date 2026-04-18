@@ -2,13 +2,17 @@
 import { Link } from "react-router-dom";
 import "./Home.css";
 
-export default function Home() {
+export default function Home({ userName }) {
   return (
     <div className="home-page">
       <section className="home-hero">
         <div className="home-hero-banner">
           <div className="home-hero-overlay">
-            <p className="home-hero-eyebrow">Respeto sin excepciones</p>
+            {userName ? (
+              <p className="home-user-greeting">Hola, {userName}</p>
+            ) : (
+              <p className="home-hero-eyebrow">Respeto sin excepciones</p>
+            )}
             <h1 className="home-hero-title">Infórmate, actúa y promueve un entorno seguro.</h1>
             <p className="home-hero-copy">Explora casos reales, guía de acción y leyes para proteger tus derechos en el trabajo.</p>
           </div>

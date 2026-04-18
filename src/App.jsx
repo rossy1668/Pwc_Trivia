@@ -83,6 +83,15 @@ function AppRoutes() {
     return unsubscribe;
   }, []);
 
+  const getUserName = (firebaseUser) => {
+    if (!firebaseUser) return null;
+    if (firebaseUser.displayName) return firebaseUser.displayName;
+    if (firebaseUser.email) return firebaseUser.email.split('@')[0];
+    return 'Usuario';
+  };
+
+  const userName = getUserName(user);
+
   const handleSignOut = async () => {
     await signOutUser();
     navigate("/login");
@@ -96,11 +105,11 @@ function AppRoutes() {
       <main className="container" style={{ flex: 1, padding: "40px 0" }}>
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/home" element={<Home />} />
+          <Route path="/home" element={<Home userName={userName} />} />
           <Route path="/trivia" element={<Trivia />} />
           <Route path="/guia" element={<Guia />} />
           <Route path="/leyes" element={<Leyes />} />
-          <Route path="/denuncia" element={<Denuncia />} />
+          <Route path="/denuncia" element={<Denuncia user={user} />} />
           <Route path="/login" element={user ? <Navigate to="/home" replace /> : <Login />} />
         </Routes>
       </main>

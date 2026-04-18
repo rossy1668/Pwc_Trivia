@@ -1,6 +1,7 @@
 ﻿import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, signOut } from "firebase/auth";
-import { getFirestore, collection, doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { getFirestore, collection, doc, setDoc, serverTimestamp, query, where, getDocs } from "firebase/firestore";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCmKuHHsxJRss0n7J4z5SxEgof2Syabuog",
@@ -14,6 +15,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const storage = getStorage(app);
 export const googleProvider = new GoogleAuthProvider();
 
 export async function signInWithEmail(email, password) {
@@ -44,14 +46,56 @@ export async function saveTriviaResult(score, total) {
   });
 }
 
-export async function submitDenuncia(denunciaData) {
-  const denunciaRef = doc(collection(db, 'denuncias'));
+export async function uploadDenunciaFiles(denunciaId, files) {
+  const uploadedFiles = [];
+
+  for (const file of files) {
+    const fileRef = storageRef(storage, `denuncias/${denunciaId}/${Date.now()}-${file.name}`);
+    await uploadBytes(fileRef, file);
+    const url = await getDownloadURL(fileRef);
+    uploadedFiles.push({ name: file.name, url });
+  }
+
+  return uploadedFiles;
+}
+
+export async function submitDenuncia(denunciaData, id = null) {
+  const denunciaRef = id ? doc(db, 'denuncias', id) : doc(collection(db, 'denuncias'));
+
   await setDoc(denunciaRef, {
     ...denunciaData,
-    usuario: auth.currentUser ? {
-      uid: auth.currentUser.uid,
-      email: auth.currentUser.email || ''
-    } : null,
+    usuario: auth.currentUser
+      ? {
+          uid: auth.currentUser.uid,
+          email: auth.currentUser.email || '',
+          nombre: auth.currentUser.displayName || auth.currentUser.email?.split('@')[0] || ''
+        }
+      : null,
     fecha: serverTimestamp()
   });
+
+  return denunciaRef.id;
+}
+
+export async function fetchDenunciasByEmail(email) {
+  if (!email) return [];
+
+  const denunciasRef = collection(db, 'denuncias');
+  const denunciasQuery = query(denunciasRef, where('usuario.email', '==', email));
+  const querySnapshot = await getDocs(denunciasQuery);
+
+  return querySnapshot.docs.map((docItem) => ({
+    id: docItem.id,
+    ...docItem.data()
+  }));
+}
+
+export async function fetchAllDenuncias() {
+  const denunciasRef = collection(db, 'denuncias');
+  const querySnapshot = await getDocs(denunciasRef);
+
+  return querySnapshot.docs.map((docItem) => ({
+    id: docItem.id,
+    ...docItem.data()
+  }));
 }

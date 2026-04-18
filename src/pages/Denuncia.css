@@ -133,3 +133,93 @@
     padding: 24px;
   }
 }
+
+.denuncia-attachment-list {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.denuncia-attachment-item {
+  background-color: #f1f1f1;
+  color: #333;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+}
+
+.denuncia-panel-card {
+  width: 100%;
+  max-width: 900px;
+  margin-top: 40px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.06);
+  padding: 30px;
+}
+
+.denuncia-panel-header h2 {
+  margin: 0 0 8px;
+}
+
+.denuncia-panel-header p {
+  margin: 0 0 24px;
+  color: #555;
+}
+
+.denuncia-panel-list {
+  display: grid;
+  gap: 18px;
+}
+
+.denuncia-panel-item {
+  padding: 22px;
+  border-radius: 14px;
+  background: #f8f8f8;
+  border: 1px solid #e7e7e7;
+}
+
+.denuncia-panel-meta {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+  color: #444;
+  font-size: 0.95rem;
+}
+
+.denuncia-panel-case {
+  font-weight: 700;
+}
+
+.denuncia-panel-date {
+  color: #777;
+}
+
+.denuncia-panel-field {
+  margin: 10px 0;
+  line-height: 1.7;
+  color: #333;
+}
+
+.denuncia-panel-attachments ul {
+  margin: 8px 0 0;
+  padding-left: 20px;
+}
+
+.denuncia-panel-attachments a {
+  color: #D04A02;
+  text-decoration: none;
+}
+
+.denuncia-panel-attachments a:hover {
+  text-decoration: underline;
+}
+
+.denuncia-info {
+  background-color: #eef6ff;
+  color: #0e3a5c;
+  border: 1px solid #bdd7f3;
+}
