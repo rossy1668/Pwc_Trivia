@@ -219,10 +219,18 @@ export async function uploadDenunciaFiles(denunciaId, files) {
         originalName: file.name,
         url,
         compressed: processedFile !== file,
-        size: processedFile.size
+        size: processedFile.size,
+        type: processedFile.type || file.type
       });
 
-      console.log(`Archivo ${processedFile.name} procesado exitosamente`);
+      console.log(`✅ Archivo procesado exitosamente:`, {
+        originalName: file.name,
+        processedName: processedFile.name,
+        url: url.substring(0, 50) + '...',
+        compressed: processedFile !== file,
+        size: processedFile.size,
+        type: processedFile.type || file.type
+      });
 
     } catch (fileError) {
       console.error(`Error procesando ${processedFile.name}:`, fileError);

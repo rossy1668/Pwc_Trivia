@@ -218,36 +218,54 @@ export default function Denuncia({ user }) {
                       <div className="denuncia-panel-attachments">
                         <strong>Adjuntos:</strong>
                         <div className="attachments-grid">
-                          {denunciaItem.attachments.map((file) => {
-                            const isImage = file.name.match(/\.(jpg|jpeg|png|gif|webp|bmp|tiff)$/i) ||
-                                          file.url.includes('image/') ||
-                                          (file.originalName && file.originalName.match(/\.(jpg|jpeg|png|gif|webp|bmp|tiff)$/i));
+                          {denunciaItem.attachments.map((file, index) => {
+                            console.log('Procesando archivo:', index, file);
+
+                            // Mejor detección de imágenes - verificar múltiples formas
+                            const fileName = file.originalName || file.name || '';
+                            const fileUrl = file.url || '';
+
+                            const isImage = fileName.match(/\.(jpg|jpeg|png|gif|webp|bmp|tiff)$/i) ||
+                                          fileUrl.match(/\.(jpg|jpeg|png|gif|webp|bmp|tiff)(\?|$)/i) ||
+                                          file.type === 'image' ||
+                                          fileUrl.includes('firebase') && (
+                                            fileName.includes('.jpg') || fileName.includes('.jpeg') ||
+                                            fileName.includes('.png') || fileName.includes('.gif') ||
+                                            fileName.includes('.webp')
+                                          );
+
+                            console.log('Archivo detectado como imagen:', isImage, 'Nombre:', fileName, 'URL:', fileUrl);
 
                             return (
-                              <div key={file.url} className="attachment-item">
+                              <div key={file.url || index} className="attachment-item">
                                 {isImage ? (
                                   <div className="attachment-image-container">
                                     <img
                                       src={file.url}
-                                      alt={file.name}
+                                      alt={file.originalName || file.name}
                                       className="attachment-image"
+                                      onLoad={() => console.log('Imagen cargada correctamente:', file.url)}
                                       onError={(e) => {
+                                        console.error('Error cargando imagen:', file.url, e);
                                         e.target.style.display = 'none';
                                         e.target.nextSibling.style.display = 'block';
                                       }}
                                     />
                                     <a href={file.url} target="_blank" rel="noreferrer" className="attachment-link">
-                                      {file.name}
+                                      📷 {file.originalName || file.name}
                                     </a>
                                   </div>
                                 ) : (
                                   <a href={file.url} target="_blank" rel="noreferrer" className="attachment-link">
-                                    📎 {file.name}
+                                    📎 {file.originalName || file.name}
                                   </a>
                                 )}
                                 {file.compressed && (
                                   <span className="attachment-compressed">⚡ Optimizado</span>
                                 )}
+                                <div className="debug-info" style={{fontSize: '10px', color: '#666', marginTop: '4px'}}>
+                                  Debug: {fileName} | URL: {fileUrl.substring(0, 50)}...
+                                </div>
                               </div>
                             );
                           })}
