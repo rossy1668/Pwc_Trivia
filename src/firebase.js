@@ -64,30 +64,60 @@ export async function saveTriviaResult(score, total) {
 
 export async function uploadDenunciaFiles(denunciaId, files) {
   const uploadedFiles = [];
-  const maxSize = 10 * 1024 * 1024; // 10MB por archivo
+  const maxSize = 50 * 1024 * 1024; // 50MB por archivo
+  const uploadTimeout = 60000; // 60 segundos timeout
 
-  try {
-    for (const file of files) {
-      if (file.size > maxSize) {
-        throw new Error(`Archivo ${file.name} demasiado grande. Máximo 10MB.`);
-      }
-
-      try {
-        const fileRef = storageRef(storage, `denuncias/${denunciaId}/${Date.now()}-${file.name}`);
-        const uploadTask = uploadBytes(fileRef, file);
-        
-        await uploadTask;
-        
-        const url = await getDownloadURL(fileRef);
-        uploadedFiles.push({ name: file.name, url });
-      } catch (fileError) {
-        console.error(`Error subiendo ${file.name}:`, fileError);
-        throw new Error(`No se pudo subir ${file.name}. ${fileError.message}`);
-      }
+  for (const file of files) {
+    // Validar tamaño
+    if (file.size > maxSize) {
+      throw new Error(`Archivo "${file.name}" demasiado grande. Máximo 50MB.`);
     }
-  } catch (error) {
-    console.error("Error en uploadDenunciaFiles:", error);
-    throw error;
+
+    // Validar tipo de archivo
+    const validTypes = [
+      'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-powerpoint',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'text/plain',
+      'application/zip',
+      'application/x-rar-compressed',
+      'application/x-7z-compressed'
+    ];
+
+    if (!validTypes.includes(file.type) && !file.type.startsWith('image/')) {
+      console.warn(`Tipo de archivo ${file.type} puede no ser soportado, intentando subir...`);
+    }
+
+    try {
+      const fileName = `${Date.now()}-${file.name}`;
+      const fileRef = storageRef(storage, `denuncias/${denunciaId}/${fileName}`);
+
+      // Crear una promesa con timeout
+      const uploadPromise = uploadBytes(fileRef, file, {
+        contentType: file.type || 'application/octet-stream'
+      });
+
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Timeout al subir archivo. Intenta con un archivo más pequeño.')), uploadTimeout)
+      );
+
+      // Competir entre el upload y el timeout
+      await Promise.race([uploadPromise, timeoutPromise]);
+
+      // Obtener URL de descarga
+      const url = await getDownloadURL(fileRef);
+      uploadedFiles.push({ name: file.name, url });
+
+      console.log(`Archivo ${file.name} subido exitosamente`);
+    } catch (fileError) {
+      console.error(`Error subiendo ${file.name}:`, fileError);
+      throw new Error(`No se pudo subir "${file.name}": ${fileError.message}`);
+    }
   }
 
   return uploadedFiles;

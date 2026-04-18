@@ -67,7 +67,7 @@ export default function Denuncia({ user }) {
     }
 
     if (attachments.length > 0) {
-      const maxSizeMB = 10;
+      const maxSizeMB = 50;
       const maxSizeBytes = maxSizeMB * 1024 * 1024;
       
       for (const file of attachments) {
@@ -255,22 +255,27 @@ export default function Denuncia({ user }) {
                 <input
                   className="denuncia-input"
                   type="file"
-                  accept="image/*,.pdf,.doc,.docx,.txt"
+                  accept="image/*,.pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.7z"
                   multiple
                   onChange={handleAttachmentChange}
                   disabled={loading}
                 />
+                <small style={{ color: '#666', fontSize: '0.85rem', marginTop: '4px', display: 'block' }}>
+                  Formatos permitidos: Imágenes, PDF, Word, Excel, PowerPoint, Texto, Comprimidos. Máx. 50MB por archivo.
+                </small>
                 {attachments.length > 0 && (
                   <div className="denuncia-attachment-list">
                     {attachments.map((file) => (
-                      <span key={file.name} className="denuncia-attachment-item">{file.name}</span>
+                      <span key={file.name} className="denuncia-attachment-item">
+                        {file.name} ({(file.size / 1024).toFixed(2)}kb)
+                      </span>
                     ))}
                   </div>
                 )}
               </div>
 
               <button className="denuncia-submit-btn" type="submit" disabled={loading}>
-                {loading ? 'Enviando...' : 'Enviar reporte'}
+                {loading ? (attachments.length > 0 ? 'Subiendo archivos...' : 'Enviando reporte...') : 'Enviar reporte'}
               </button>
             </form>
           </div>
