@@ -1,13 +1,16 @@
 ﻿import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../assets/css/login.css';
-import { signInWithEmail, signInWithGoogle } from '../firebase';
+import { signInWithEmail, signInWithGoogle, signUpWithEmail } from '../firebase';
 
 const basePath = import.meta.env.BASE_URL;
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [name, setName] = useState('');
+  const [registerMode, setRegisterMode] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -23,15 +26,33 @@ export default function Login() {
       return;
     }
 
+    if (registerMode) {
+      if (!name.trim()) {
+        setError('Ingresa un nombre para el nuevo usuario.');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        setError('Las contraseñas no coinciden.');
+        return;
+      }
+    }
+
     setLoading(true);
     try {
-      await signInWithEmail(email, password);
-      setMessage('Inicio de sesión correcto. Redirigiendo...');
+      if (registerMode) {
+        await signUpWithEmail(email, password, name.trim());
+        setMessage('Cuenta creada correctamente. Redirigiendo...');
+      } else {
+        await signInWithEmail(email, password);
+        setMessage('Inicio de sesión correcto. Redirigiendo...');
+      }
+
       setTimeout(() => {
         navigate('/home');
       }, 600);
     } catch (error) {
-      setError(error.message || 'Error al iniciar sesión.');
+      setError(error.message || (registerMode ? 'Error al registrar la cuenta.' : 'Error al iniciar sesión.'));
     } finally {
       setLoading(false);
     }
@@ -64,13 +85,27 @@ export default function Login() {
           <div className="slogan">"El silencio no protege, el conocimiento sí"</div>
         </div>
 
-        <h1>Iniciar sesión</h1>
+        <h1>{registerMode ? 'Crear cuenta' : 'Iniciar sesión'}</h1>
         <p className="subtitle">Accede al portal de empleados y continúa con tus recursos de prevención.</p>
 
         {error && <div className="login-alert error">{error}</div>}
         {message && <div className="login-alert success">{message}</div>}
 
         <form className="login-form" onSubmit={handleSubmit}>
+          {registerMode && (
+            <div className="field">
+              <label htmlFor="name">Nombre de usuario</label>
+              <input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                placeholder="Nombre completo"
+                autoComplete="name"
+              />
+            </div>
+          )}
+
           <div className="field">
             <label htmlFor="email">Correo electrónico</label>
             <input
@@ -91,9 +126,23 @@ export default function Login() {
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               placeholder="Ingresa tu contraseña"
-              autoComplete="current-password"
+              autoComplete={registerMode ? 'new-password' : 'current-password'}
             />
           </div>
+
+          {registerMode && (
+            <div className="field">
+              <label htmlFor="confirmPassword">Confirmar contraseña</label>
+              <input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+                placeholder="Repite tu contraseña"
+                autoComplete="new-password"
+              />
+            </div>
+          )}
 
           <div className="field-row">
             <label>
@@ -103,7 +152,7 @@ export default function Login() {
           </div>
 
           <button id="btn-signin" type="submit" disabled={loading}>
-            {loading ? 'Conectando...' : 'Ingresar'}
+            {loading ? (registerMode ? 'Registrando...' : 'Conectando...') : (registerMode ? 'Crear cuenta' : 'Ingresar')}
           </button>
         </form>
 
@@ -122,7 +171,11 @@ export default function Login() {
         </button>
 
         <p className="signup-row">
-          ¿Aún no tienes cuenta? <span style={{ color: '#E0301E', fontWeight: '600' }}>Regístrate</span>
+          {registerMode ? (
+            <>¿Ya tienes cuenta? <span style={{ color: '#E0301E', fontWeight: '600', cursor: 'pointer' }} onClick={() => setRegisterMode(false)}>Ingresar</span></>
+          ) : (
+            <>¿Aún no tienes cuenta? <span style={{ color: '#E0301E', fontWeight: '600', cursor: 'pointer' }} onClick={() => setRegisterMode(true)}>Regístrate</span></>
+          )}
         </p>
       </div>
     </div>

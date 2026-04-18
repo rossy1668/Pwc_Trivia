@@ -1,5 +1,13 @@
 ﻿import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, signOut } from "firebase/auth";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+  updateProfile
+} from "firebase/auth";
 import { getFirestore, collection, doc, setDoc, serverTimestamp, query, where, getDocs } from "firebase/firestore";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
 
@@ -20,6 +28,14 @@ export const googleProvider = new GoogleAuthProvider();
 
 export async function signInWithEmail(email, password) {
   return signInWithEmailAndPassword(auth, email, password);
+}
+
+export async function signUpWithEmail(email, password, displayName = '') {
+  const credential = await createUserWithEmailAndPassword(auth, email, password);
+  if (displayName && credential.user) {
+    await updateProfile(credential.user, { displayName });
+  }
+  return credential;
 }
 
 export async function signInWithGoogle() {
