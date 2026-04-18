@@ -214,7 +214,13 @@ export default function Denuncia({ user }) {
                       <span className="denuncia-panel-case">Caso #{denunciaItem.caseNumber || denunciaItem.id.slice(0, 8).toUpperCase()}</span>
                       <span className="denuncia-panel-date">{formatTimestamp(denunciaItem.fecha)}</span>
                     </div>
-                    <p className="denuncia-panel-field"><strong>Modalidad:</strong> {denunciaItem.modalidad}</p>
+                    <p className="denuncia-panel-field">
+                      <strong>Denunciante:</strong> {
+                        denunciaItem.modalidad === 'Identificado' && denunciaItem.usuario
+                          ? `${denunciaItem.usuario.nombre || 'Usuario'} (${denunciaItem.usuario.email})`
+                          : 'Anónimo (Protección contra represalias)'
+                      }
+                    </p>
                     <p className="denuncia-panel-field"><strong>Área incidente:</strong> {denunciaItem.areaIncidente || 'No indicado'}</p>
                     <p className="denuncia-panel-field"><strong>Responsable:</strong> {denunciaItem.responsable || 'No indicado'}</p>
                     <p className="denuncia-panel-field"><strong>Descripción:</strong> {denunciaItem.descripcion}</p>
