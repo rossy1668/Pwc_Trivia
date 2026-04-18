@@ -46,7 +46,7 @@ export async function signOutUser() {
   return signOut(auth);
 }
 
-export async function saveTriviaResult(score, total) {
+export async function saveTriviaResult(score, total, answers = null) {
   if (!auth.currentUser) {
     throw new Error('Debes iniciar sesión para guardar el resultado.');
   }
@@ -55,11 +55,27 @@ export async function saveTriviaResult(score, total) {
   await setDoc(resultRef, {
     uid: auth.currentUser.uid,
     email: auth.currentUser.email || '',
+    nombre: auth.currentUser.displayName || auth.currentUser.email?.split('@')[0] || '',
     puntaje: score,
     total,
     porcentaje: Math.round((score / total) * 100),
+    respuestas: answers, // Array con las respuestas individuales si se proporciona
     fecha: serverTimestamp()
   });
+
+  return resultRef.id;
+}
+
+export async function getTriviaStatistics() {
+  const resultadosRef = collection(db, 'resultados_trivia');
+  const querySnapshot = await getDocs(resultadosRef);
+
+  const results = querySnapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  }));
+
+  return results;
 }
 
 // Función para comprimir imágenes automáticamente

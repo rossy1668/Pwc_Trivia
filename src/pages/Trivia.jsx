@@ -1,7 +1,10 @@
 ﻿import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "../firebase";
 import "../assets/css/trivia.css";
 import { saveTriviaResult } from "../firebase";
+import AnalyticsDashboard from "./AnalyticsDashboard";
 
 const preguntas = [
   {
@@ -57,6 +60,23 @@ const preguntas = [
 ];
 
 export default function Trivia() {
+  const [user] = useAuthState(auth);
+
+  // Lista de emails de RH autorizados
+  const approvedHrEmails = [
+    "rrhh@pwc.com",
+    "rh@pwc.com",
+    "rh@empresa.com"
+  ];
+
+  const isHrUser = user?.email ? approvedHrEmails.includes(user.email.toLowerCase()) : false;
+
+  // Si es usuario de RH, mostrar dashboard analítico
+  if (isHrUser) {
+    return <AnalyticsDashboard user={user} />;
+  }
+
+  // Componente de trivia normal para usuarios regulares
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState(null);
