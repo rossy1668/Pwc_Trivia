@@ -101,7 +101,21 @@ async function compressImage(file, maxWidth = 1200, maxHeight = 1200, quality = 
       // Dibujar y comprimir
       ctx.drawImage(img, 0, 0, width, height);
 
-      canvas.toBlob(resolve, 'image/jpeg', quality);
+      // Preservar formato original cuando sea posible, usar JPEG solo como fallback
+      const originalFormat = file.type.toLowerCase();
+      let outputFormat = 'image/jpeg'; // fallback
+
+      if (originalFormat === 'image/png') {
+        outputFormat = 'image/png';
+      } else if (originalFormat === 'image/webp') {
+        outputFormat = 'image/webp';
+      } else if (originalFormat === 'image/gif') {
+        // GIF no se puede comprimir bien con canvas, mantener original
+        resolve(file);
+        return;
+      }
+
+      canvas.toBlob(resolve, outputFormat, quality);
     };
 
     img.src = URL.createObjectURL(file);

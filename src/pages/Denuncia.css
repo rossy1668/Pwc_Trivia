@@ -224,6 +224,61 @@
   text-decoration: underline;
 }
 
+.attachments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.attachment-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.attachment-image-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.attachment-image {
+  max-width: 100%;
+  max-height: 150px;
+  object-fit: contain;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.attachment-link {
+  color: #D04A02;
+  text-decoration: none;
+  font-size: 0.9rem;
+  text-align: center;
+  word-break: break-word;
+  margin-bottom: 4px;
+}
+
+.attachment-link:hover {
+  text-decoration: underline;
+}
+
+.attachment-compressed {
+  font-size: 0.75rem;
+  color: #28a745;
+  background: #e6ffed;
+  padding: 2px 6px;
+  border-radius: 10px;
+  border: 1px solid #b7f2c4;
+}
+
 .denuncia-info {
   background-color: #eef6ff;
   color: #0e3a5c;

@@ -217,13 +217,41 @@ export default function Denuncia({ user }) {
                     {denunciaItem.attachments?.length > 0 && (
                       <div className="denuncia-panel-attachments">
                         <strong>Adjuntos:</strong>
-                        <ul>
-                          {denunciaItem.attachments.map((file) => (
-                            <li key={file.url}>
-                              <a href={file.url} target="_blank" rel="noreferrer">{file.name}</a>
-                            </li>
-                          ))}
-                        </ul>
+                        <div className="attachments-grid">
+                          {denunciaItem.attachments.map((file) => {
+                            const isImage = file.name.match(/\.(jpg|jpeg|png|gif|webp|bmp|tiff)$/i) ||
+                                          file.url.includes('image/') ||
+                                          (file.originalName && file.originalName.match(/\.(jpg|jpeg|png|gif|webp|bmp|tiff)$/i));
+
+                            return (
+                              <div key={file.url} className="attachment-item">
+                                {isImage ? (
+                                  <div className="attachment-image-container">
+                                    <img
+                                      src={file.url}
+                                      alt={file.name}
+                                      className="attachment-image"
+                                      onError={(e) => {
+                                        e.target.style.display = 'none';
+                                        e.target.nextSibling.style.display = 'block';
+                                      }}
+                                    />
+                                    <a href={file.url} target="_blank" rel="noreferrer" className="attachment-link">
+                                      {file.name}
+                                    </a>
+                                  </div>
+                                ) : (
+                                  <a href={file.url} target="_blank" rel="noreferrer" className="attachment-link">
+                                    📎 {file.name}
+                                  </a>
+                                )}
+                                {file.compressed && (
+                                  <span className="attachment-compressed">⚡ Optimizado</span>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
                     )}
                   </article>
