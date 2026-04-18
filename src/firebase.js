@@ -94,8 +94,8 @@ async function compressImage(file, maxWidth = 1200, maxHeight = 1200, quality = 
 
 export async function uploadDenunciaFiles(denunciaId, files) {
   const uploadedFiles = [];
-  const maxSize = 50 * 1024 * 1024; // Aumentado a 50MB para documentos corporativos
-  const baseTimeout = 30000; // 30 segundos base
+  const maxSize = 25 * 1024 * 1024; // Reducido a 25MB para mejor UX - equilibrio entre necesidad corporativa y velocidad
+  const baseTimeout = 15000; // Reducido a 15 segundos - crítico para UX en situaciones de estrés
 
   console.log(`Iniciando upload optimizado de ${files.length} archivo(s)`);
 
@@ -104,18 +104,15 @@ export async function uploadDenunciaFiles(denunciaId, files) {
 
     let processedFile = file;
 
-    // Calcular timeout dinámico basado en el tamaño del archivo
-    // Base 30s + 1s por cada 2MB adicionales
-    const sizeInMB = file.size / (1024 * 1024);
-    const uploadTimeout = Math.max(baseTimeout, baseTimeout + (sizeInMB - 2) * 500);
+    // Timeout más corto y fijo para consistencia
+    const uploadTimeout = baseTimeout;
 
-    console.log(`Timeout calculado: ${uploadTimeout}ms para ${(file.size / 1024 / 1024).toFixed(2)}MB`);
-
-    // Comprimir imágenes automáticamente si son muy grandes
-    if (file.type.startsWith('image/') && file.size > 2 * 1024 * 1024) { // > 2MB
+    // Compresión más agresiva para velocidad
+    if (file.type.startsWith('image/') && file.size > 1 * 1024 * 1024) { // > 1MB
       try {
-        console.log(`Comprimiendo imagen ${file.name}...`);
-        const compressedBlob = await compressImage(file);
+        console.log(`Comprimiendo imagen agresivamente ${file.name}...`);
+        // Compresión más agresiva: menor calidad y tamaño
+        const compressedBlob = await compressImage(file, 800, 800, 0.6);
         processedFile = new File([compressedBlob], file.name, {
           type: 'image/jpeg',
           lastModified: Date.now()
@@ -128,7 +125,8 @@ export async function uploadDenunciaFiles(denunciaId, files) {
 
     // Validar tamaño después de compresión
     if (processedFile.size > maxSize) {
-      throw new Error(`El archivo "${file.name}" excede el límite de ${(maxSize / 1024 / 1024).toFixed(0)}MB. Considera dividir el documento en partes más pequeñas o comprimirlo.`);
+      console.warn(`Archivo ${file.name} demasiado grande (${(processedFile.size / 1024 / 1024).toFixed(2)}MB > ${(maxSize / 1024 / 1024).toFixed(0)}MB), saltando...`);
+      continue; // Saltar archivo en lugar de fallar completamente
     }
 
     // Validar tipo de archivo
@@ -149,7 +147,8 @@ export async function uploadDenunciaFiles(denunciaId, files) {
     ];
 
     if (!validTypes.includes(processedFile.type) && !processedFile.type.startsWith('image/')) {
-      console.warn(`Tipo de archivo ${processedFile.type} puede no ser soportado, intentando subir...`);
+      console.warn(`Tipo de archivo ${processedFile.type} no soportado, saltando ${file.name}...`);
+      continue;
     }
 
     try {
@@ -164,16 +163,17 @@ export async function uploadDenunciaFiles(denunciaId, files) {
       });
 
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error(`El archivo está tardando más de lo esperado (${Math.round(uploadTimeout/1000)}s). Si es muy grande, considera dividirlo en partes más pequeñas.`)), uploadTimeout)
+        setTimeout(() => reject(new Error(`Timeout: Archivo muy grande para subir ahora`)), uploadTimeout)
       );
 
-      // Intentar el upload con timeout reducido
+      // Intentar el upload con timeout más corto
       try {
         await Promise.race([uploadPromise, timeoutPromise]);
         console.log(`Upload completado para ${processedFile.name}`);
       } catch (timeoutError) {
         console.error(`Timeout durante upload de ${processedFile.name}:`, timeoutError);
-        throw new Error(`No se pudo subir "${processedFile.name}" en el tiempo esperado. El archivo puede ser muy grande para tu conexión actual. Considera usar archivos más pequeños o una conexión más rápida.`);
+        console.log(`Saltando archivo ${processedFile.name} por timeout - denuncia se enviará sin él`);
+        continue; // Continuar con otros archivos
       }
 
       // Obtener URL de descarga con timeout más corto

@@ -102,17 +102,7 @@ export default function Denuncia({ user }) {
       return;
     }
 
-    if (attachments.length > 0) {
-      const maxSizeMB = 50;
-      const maxSizeBytes = maxSizeMB * 1024 * 1024;
-      
-      for (const file of attachments) {
-        if (file.size > maxSizeBytes) {
-          setError(`El archivo "${file.name}" excede el límite de ${maxSizeMB}MB. Considera dividir el documento en partes más pequeñas o comprimirlo.`);
-          return;
-        }
-      }
-    }
+    // Validación básica - no validar archivos aquí, dejar que el sistema los maneje
 
     setLoading(true);
     setError(""); // Limpiar errores previos
