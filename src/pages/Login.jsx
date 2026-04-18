@@ -16,6 +16,14 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const toggleRegisterMode = () => {
+    setRegisterMode((prev) => !prev);
+    setError('');
+    setMessage('');
+    setConfirmPassword('');
+    setName('');
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError('');
@@ -172,9 +180,9 @@ export default function Login() {
 
         <p className="signup-row">
           {registerMode ? (
-            <>¿Ya tienes cuenta? <span style={{ color: '#E0301E', fontWeight: '600', cursor: 'pointer' }} onClick={() => setRegisterMode(false)}>Ingresar</span></>
+            <>¿Ya tienes cuenta? <button type="button" className="signup-link" onClick={toggleRegisterMode}>Ingresar</button></>
           ) : (
-            <>¿Aún no tienes cuenta? <span style={{ color: '#E0301E', fontWeight: '600', cursor: 'pointer' }} onClick={() => setRegisterMode(true)}>Regístrate</span></>
+            <>¿Aún no tienes cuenta? <button type="button" className="signup-link" onClick={toggleRegisterMode}>Regístrate</button></>
           )}
         </p>
       </div>
