@@ -1,6 +1,6 @@
 ﻿import { useEffect, useState } from "react";
 import { collection, doc } from "firebase/firestore";
-import { db, submitDenuncia, uploadDenunciaFiles, fetchDenunciasByEmail } from "../firebase";
+import { db, submitDenuncia, uploadDenunciaFiles, fetchDenunciasByEmail, fetchAllDenuncias } from "../firebase";
 import "./Denuncia.css";
 
 export default function Denuncia({ user }) {
@@ -91,7 +91,7 @@ export default function Denuncia({ user }) {
         reference.id
       );
 
-      setMessage(`Denuncia enviada correctamente. Tu número de caso es ${caso}. Revisa tu panel de seguimiento más abajo.`);
+      setMessage(`Denuncia enviada correctamente. Tu número de caso es ${caso}. El área de RH revisará tu reporte y te contactará si es necesario.`);
       setModalidad("Anónimo (Protección contra represalias)");
       setLineaServicio("");
       setCargo("");
@@ -209,47 +209,45 @@ export default function Denuncia({ user }) {
         </form>
       </div>
 
-      <div className="denuncia-panel-card">
-        <div className="denuncia-panel-header">
-          <h2>Panel de denuncias</h2>
-          <p>Consulta los reportes que has creado desde tu cuenta.</p>
-        </div>
-
-        {!user ? (
-          <div className="denuncia-alert denuncia-info">Inicia sesión para acceder y enviar una denuncia.</div>
-        ) : !isHrUser ? (
-          <div className="denuncia-alert denuncia-info">Solo el equipo de RH puede visualizar el panel de denuncias. Envía tu reporte arriba y RH podrá revisarlo.</div>
-        ) : denuncias.length === 0 ? (
-          <div className="denuncia-alert denuncia-info">No hay denuncias registradas todavía.</div>
-        ) : (
-          <div className="denuncia-panel-list">
-            {denuncias.map((denunciaItem) => (
-              <article key={denunciaItem.id} className="denuncia-panel-item">
-                <div className="denuncia-panel-meta">
-                  <span className="denuncia-panel-case">Caso #{denunciaItem.caseNumber || denunciaItem.id.slice(0, 8).toUpperCase()}</span>
-                  <span className="denuncia-panel-date">{formatTimestamp(denunciaItem.fecha)}</span>
-                </div>
-                <p className="denuncia-panel-field"><strong>Modalidad:</strong> {denunciaItem.modalidad}</p>
-                <p className="denuncia-panel-field"><strong>Área incidente:</strong> {denunciaItem.areaIncidente || 'No indicado'}</p>
-                <p className="denuncia-panel-field"><strong>Responsable:</strong> {denunciaItem.responsable || 'No indicado'}</p>
-                <p className="denuncia-panel-field"><strong>Descripción:</strong> {denunciaItem.descripcion}</p>
-                {denunciaItem.attachments?.length > 0 && (
-                  <div className="denuncia-panel-attachments">
-                    <strong>Adjuntos:</strong>
-                    <ul>
-                      {denunciaItem.attachments.map((file) => (
-                        <li key={file.url}>
-                          <a href={file.url} target="_blank" rel="noreferrer">{file.name}</a>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </article>
-            ))}
+      {isHrUser && (
+        <div className="denuncia-panel-card">
+          <div className="denuncia-panel-header">
+            <h2>Panel de denuncias</h2>
+            <p>Consulta los reportes que han sido registrados.</p>
           </div>
-        )}
-      </div>
+
+          {denuncias.length === 0 ? (
+            <div className="denuncia-alert denuncia-info">No hay denuncias registradas todavía.</div>
+          ) : (
+            <div className="denuncia-panel-list">
+              {denuncias.map((denunciaItem) => (
+                <article key={denunciaItem.id} className="denuncia-panel-item">
+                  <div className="denuncia-panel-meta">
+                    <span className="denuncia-panel-case">Caso #{denunciaItem.caseNumber || denunciaItem.id.slice(0, 8).toUpperCase()}</span>
+                    <span className="denuncia-panel-date">{formatTimestamp(denunciaItem.fecha)}</span>
+                  </div>
+                  <p className="denuncia-panel-field"><strong>Modalidad:</strong> {denunciaItem.modalidad}</p>
+                  <p className="denuncia-panel-field"><strong>Área incidente:</strong> {denunciaItem.areaIncidente || 'No indicado'}</p>
+                  <p className="denuncia-panel-field"><strong>Responsable:</strong> {denunciaItem.responsable || 'No indicado'}</p>
+                  <p className="denuncia-panel-field"><strong>Descripción:</strong> {denunciaItem.descripcion}</p>
+                  {denunciaItem.attachments?.length > 0 && (
+                    <div className="denuncia-panel-attachments">
+                      <strong>Adjuntos:</strong>
+                      <ul>
+                        {denunciaItem.attachments.map((file) => (
+                          <li key={file.url}>
+                            <a href={file.url} target="_blank" rel="noreferrer">{file.name}</a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
