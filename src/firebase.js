@@ -243,6 +243,120 @@ export async function uploadDenunciaFiles(denunciaId, files) {
   return uploadedFiles;
 }
 
+async function uploadToCloudinary(file, denunciaId) {
+VITE_CLOUDINARY_CLOUD_NAME=dvy6lz7kg
+VITE_CLOUDINARY_UPLOAD_PRESET=Trivia_PWC
+
+  if (!cloudName || !uploadPreset) {
+    throw new Error('Configura VITE_CLOUDINARY_CLOUD_NAME y VITE_CLOUDINARY_UPLOAD_PRESET en tu .env');
+  }
+
+  const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
+  const formData = new FormData();
+
+  formData.append('file', file);
+  formData.append('upload_preset', uploadPreset);
+  formData.append('resource_type', 'auto');
+  formData.append('folder', `denuncias/${denunciaId}`);
+  formData.append('public_id', `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9_-]/g, '_')}`);
+
+  const response = await fetch(cloudinaryUrl, {
+    method: 'POST',
+    body: formData
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Cloudinary upload failed: ${response.status} ${errorText}`);
+  }
+
+  return response.json();
+}
+
+export async function uploadDenunciaFiles(denunciaId, files) {
+  const uploadedFiles = [];
+  const maxSize = 25 * 1024 * 1024;
+  const baseTimeout = 15000;
+
+  console.log(`Iniciando upload optimizado de ${files.length} archivo(s)`);
+
+  for (const file of files) {
+    console.log(`Procesando archivo: ${file.name}, tamaño original: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+
+    let processedFile = file;
+    const uploadTimeout = baseTimeout;
+
+    if (file.type.startsWith('image/') && file.size > 1 * 1024 * 1024) {
+      try {
+        console.log(`Comprimiendo imagen agresivamente ${file.name}...`);
+        const compressedBlob = await compressImage(file, 800, 800, 0.6);
+        processedFile = new File([compressedBlob], file.name, {
+          type: file.type,
+          lastModified: Date.now()
+        });
+        console.log(`Imagen comprimida: ${(processedFile.size / 1024 / 1024).toFixed(2)}MB`);
+      } catch (compressError) {
+        console.warn(`No se pudo comprimir ${file.name}, usando original:`, compressError);
+      }
+    }
+
+    if (processedFile.size > maxSize) {
+      console.warn(`Archivo ${file.name} demasiado grande (${(processedFile.size / 1024 / 1024).toFixed(2)}MB > ${(maxSize / 1024 / 1024).toFixed(0)}MB), saltando...`);
+      continue;
+    }
+
+    const validTypes = [
+      'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp', 'image/tiff',
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-powerpoint',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'text/plain',
+      'application/zip',
+      'application/x-rar-compressed',
+      'application/x-7z-compressed',
+      'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp4'
+    ];
+
+    if (!validTypes.includes(processedFile.type) && !processedFile.type.startsWith('image/')) {
+      console.warn(`Tipo de archivo ${processedFile.type} no soportado, saltando ${file.name}...`);
+      continue;
+    }
+
+    try {
+      console.log(`Subiendo ${processedFile.name} a Cloudinary...`);
+      const uploadPromise = uploadToCloudinary(processedFile, denunciaId);
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error(`Timeout: Archivo muy grande para subir ahora`)), uploadTimeout)
+      );
+
+      const result = await Promise.race([uploadPromise, timeoutPromise]);
+      const url = result.secure_url || result.url;
+
+      uploadedFiles.push({
+        name: processedFile.name,
+        originalName: file.name,
+        url,
+        compressed: processedFile !== file,
+        size: processedFile.size,
+        type: processedFile.type || file.type,
+        provider: 'cloudinary'
+      });
+
+      console.log(`Archivo ${processedFile.name} procesado exitosamente: ${url}`);
+    } catch (fileError) {
+      console.error(`Error procesando ${processedFile.name}:`, fileError);
+      console.warn(`Saltando archivo problemático: ${processedFile.name}`);
+    }
+  }
+
+  console.log(`Upload completado. ${uploadedFiles.length} de ${files.length} archivo(s) procesado(s)`);
+  return uploadedFiles;
+}
+
 export async function submitDenuncia(denunciaData, id = null) {
   const denunciaRef = id ? doc(db, 'denuncias', id) : doc(collection(db, 'denuncias'));
 
