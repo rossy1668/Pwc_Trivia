@@ -198,6 +198,12 @@
   color: #777;
 }
 
+/* Animación del spinner de carga */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 .denuncia-panel-field {
   margin: 10px 0;
   line-height: 1.7;

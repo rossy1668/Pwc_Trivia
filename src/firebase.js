@@ -62,19 +62,66 @@ export async function saveTriviaResult(score, total) {
   });
 }
 
+// Función para comprimir imágenes automáticamente
+async function compressImage(file, maxWidth = 1200, maxHeight = 1200, quality = 0.8) {
+  return new Promise((resolve) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+
+    img.onload = () => {
+      // Calcular nuevas dimensiones manteniendo aspect ratio
+      let { width, height } = img;
+
+      if (width > maxWidth || height > maxHeight) {
+        const ratio = Math.min(maxWidth / width, maxHeight / height);
+        width *= ratio;
+        height *= ratio;
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
+      // Dibujar y comprimir
+      ctx.drawImage(img, 0, 0, width, height);
+
+      canvas.toBlob(resolve, 'image/jpeg', quality);
+    };
+
+    img.src = URL.createObjectURL(file);
+  });
+}
+
 export async function uploadDenunciaFiles(denunciaId, files) {
   const uploadedFiles = [];
-  const maxSize = 50 * 1024 * 1024; // 50MB por archivo
-  const uploadTimeout = 120000; // 120 segundos timeout (aumentado)
+  const maxSize = 10 * 1024 * 1024; // Reducido a 10MB por archivo para mejor UX
+  const uploadTimeout = 15000; // Reducido a 15 segundos - crítico para UX en situaciones de estrés
 
-  console.log(`Iniciando upload de ${files.length} archivo(s)`);
+  console.log(`Iniciando upload optimizado de ${files.length} archivo(s)`);
 
   for (const file of files) {
-    console.log(`Procesando archivo: ${file.name}, tamaño: ${(file.size / 1024).toFixed(2)}KB`);
+    console.log(`Procesando archivo: ${file.name}, tamaño original: ${(file.size / 1024).toFixed(2)}KB`);
 
-    // Validar tamaño
-    if (file.size > maxSize) {
-      throw new Error(`Archivo "${file.name}" demasiado grande. Máximo 50MB.`);
+    let processedFile = file;
+
+    // Comprimir imágenes automáticamente si son muy grandes
+    if (file.type.startsWith('image/') && file.size > 2 * 1024 * 1024) { // > 2MB
+      try {
+        console.log(`Comprimiendo imagen ${file.name}...`);
+        const compressedBlob = await compressImage(file);
+        processedFile = new File([compressedBlob], file.name, {
+          type: 'image/jpeg',
+          lastModified: Date.now()
+        });
+        console.log(`Imagen comprimida: ${(processedFile.size / 1024).toFixed(2)}KB`);
+      } catch (compressError) {
+        console.warn(`No se pudo comprimir ${file.name}, usando original:`, compressError);
+      }
+    }
+
+    // Validar tamaño después de compresión
+    if (processedFile.size > maxSize) {
+      throw new Error(`El archivo "${file.name}" es muy grande incluso después de optimización. Considera usar un archivo más pequeño o continuar sin adjuntos.`);
     }
 
     // Validar tipo de archivo
@@ -93,52 +140,59 @@ export async function uploadDenunciaFiles(denunciaId, files) {
       'application/x-7z-compressed'
     ];
 
-    if (!validTypes.includes(file.type) && !file.type.startsWith('image/')) {
-      console.warn(`Tipo de archivo ${file.type} puede no ser soportado, intentando subir...`);
+    if (!validTypes.includes(processedFile.type) && !processedFile.type.startsWith('image/')) {
+      console.warn(`Tipo de archivo ${processedFile.type} puede no ser soportado, intentando subir...`);
     }
 
     try {
-      const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+      const fileName = `${Date.now()}-${processedFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
       const fileRef = storageRef(storage, `denuncias/${denunciaId}/${fileName}`);
 
-      console.log(`Subiendo ${file.name} a Firebase Storage...`);
+      console.log(`Subiendo ${processedFile.name} (${(processedFile.size / 1024).toFixed(2)}KB)...`);
 
-      // Crear una promesa con timeout más largo
-      const uploadPromise = uploadBytes(fileRef, file, {
-        contentType: file.type || 'application/octet-stream'
+      // Timeout reducido para situaciones de estrés
+      const uploadPromise = uploadBytes(fileRef, processedFile, {
+        contentType: processedFile.type || 'application/octet-stream'
       });
 
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error(`Timeout al subir "${file.name}". La conexión puede ser lenta. Intenta con un archivo más pequeño o verifica tu conexión.`)), uploadTimeout)
+        setTimeout(() => reject(new Error(`La conexión está tardando más de lo esperado. Puedes continuar enviando tu denuncia sin este archivo.`)), uploadTimeout)
       );
 
-      // Intentar el upload con timeout
+      // Intentar el upload con timeout reducido
       try {
         await Promise.race([uploadPromise, timeoutPromise]);
-        console.log(`Upload completado para ${file.name}, obteniendo URL...`);
+        console.log(`Upload completado para ${processedFile.name}`);
       } catch (timeoutError) {
-        console.error(`Timeout durante upload de ${file.name}:`, timeoutError);
-        throw timeoutError;
+        console.error(`Timeout durante upload de ${processedFile.name}:`, timeoutError);
+        throw new Error(`No se pudo subir "${processedFile.name}" en este momento. Tu denuncia se enviará sin este archivo.`);
       }
 
-      // Obtener URL de descarga con timeout separado
+      // Obtener URL de descarga con timeout más corto
       const urlPromise = getDownloadURL(fileRef);
       const urlTimeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error(`Timeout obteniendo URL para "${file.name}"`)), 30000)
+        setTimeout(() => reject(new Error(`Error obteniendo enlace para "${processedFile.name}"`)), 10000)
       );
 
       const url = await Promise.race([urlPromise, urlTimeoutPromise]);
 
-      uploadedFiles.push({ name: file.name, url });
-      console.log(`Archivo ${file.name} subido exitosamente`);
+      uploadedFiles.push({
+        name: processedFile.name,
+        originalName: file.name,
+        url,
+        compressed: processedFile !== file
+      });
+
+      console.log(`Archivo ${processedFile.name} procesado exitosamente`);
 
     } catch (fileError) {
-      console.error(`Error completo subiendo ${file.name}:`, fileError);
-      throw new Error(`No se pudo subir "${file.name}": ${fileError.message}`);
+      console.error(`Error procesando ${processedFile.name}:`, fileError);
+      // En lugar de fallar completamente, continuar con otros archivos
+      console.warn(`Saltando archivo problemático: ${processedFile.name}`);
     }
   }
 
-  console.log(`Upload completado. ${uploadedFiles.length} archivo(s) subido(s)`);
+  console.log(`Upload completado. ${uploadedFiles.length} de ${files.length} archivo(s) procesado(s)`);
   return uploadedFiles;
 }
 
