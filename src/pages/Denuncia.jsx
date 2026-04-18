@@ -87,10 +87,12 @@ export default function Denuncia({ user }) {
 
       if (attachments.length > 0) {
         try {
+          console.log("Iniciando upload de archivos...");
           uploadedFiles = await uploadDenunciaFiles(reference.id, attachments);
+          console.log("Upload completado exitosamente");
         } catch (uploadError) {
           console.error("Error en upload:", uploadError);
-          setError(`Error al subir archivos: ${uploadError.message || "Intenta con archivos más pequeños"}`);
+          setError(`Error al subir archivos: ${uploadError.message || "Verifica tu conexión a internet e intenta nuevamente"}`);
           setLoading(false);
           return;
         }

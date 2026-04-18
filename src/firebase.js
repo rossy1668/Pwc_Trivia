@@ -65,9 +65,13 @@ export async function saveTriviaResult(score, total) {
 export async function uploadDenunciaFiles(denunciaId, files) {
   const uploadedFiles = [];
   const maxSize = 50 * 1024 * 1024; // 50MB por archivo
-  const uploadTimeout = 60000; // 60 segundos timeout
+  const uploadTimeout = 120000; // 120 segundos timeout (aumentado)
+
+  console.log(`Iniciando upload de ${files.length} archivo(s)`);
 
   for (const file of files) {
+    console.log(`Procesando archivo: ${file.name}, tamaño: ${(file.size / 1024).toFixed(2)}KB`);
+
     // Validar tamaño
     if (file.size > maxSize) {
       throw new Error(`Archivo "${file.name}" demasiado grande. Máximo 50MB.`);
@@ -75,7 +79,7 @@ export async function uploadDenunciaFiles(denunciaId, files) {
 
     // Validar tipo de archivo
     const validTypes = [
-      'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+      'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp', 'image/tiff',
       'application/pdf',
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -94,32 +98,47 @@ export async function uploadDenunciaFiles(denunciaId, files) {
     }
 
     try {
-      const fileName = `${Date.now()}-${file.name}`;
+      const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
       const fileRef = storageRef(storage, `denuncias/${denunciaId}/${fileName}`);
 
-      // Crear una promesa con timeout
+      console.log(`Subiendo ${file.name} a Firebase Storage...`);
+
+      // Crear una promesa con timeout más largo
       const uploadPromise = uploadBytes(fileRef, file, {
         contentType: file.type || 'application/octet-stream'
       });
 
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Timeout al subir archivo. Intenta con un archivo más pequeño.')), uploadTimeout)
+        setTimeout(() => reject(new Error(`Timeout al subir "${file.name}". La conexión puede ser lenta. Intenta con un archivo más pequeño o verifica tu conexión.`)), uploadTimeout)
       );
 
-      // Competir entre el upload y el timeout
-      await Promise.race([uploadPromise, timeoutPromise]);
+      // Intentar el upload con timeout
+      try {
+        await Promise.race([uploadPromise, timeoutPromise]);
+        console.log(`Upload completado para ${file.name}, obteniendo URL...`);
+      } catch (timeoutError) {
+        console.error(`Timeout durante upload de ${file.name}:`, timeoutError);
+        throw timeoutError;
+      }
 
-      // Obtener URL de descarga
-      const url = await getDownloadURL(fileRef);
+      // Obtener URL de descarga con timeout separado
+      const urlPromise = getDownloadURL(fileRef);
+      const urlTimeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error(`Timeout obteniendo URL para "${file.name}"`)), 30000)
+      );
+
+      const url = await Promise.race([urlPromise, urlTimeoutPromise]);
+
       uploadedFiles.push({ name: file.name, url });
-
       console.log(`Archivo ${file.name} subido exitosamente`);
+
     } catch (fileError) {
-      console.error(`Error subiendo ${file.name}:`, fileError);
+      console.error(`Error completo subiendo ${file.name}:`, fileError);
       throw new Error(`No se pudo subir "${file.name}": ${fileError.message}`);
     }
   }
 
+  console.log(`Upload completado. ${uploadedFiles.length} archivo(s) subido(s)`);
   return uploadedFiles;
 }
 
