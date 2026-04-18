@@ -94,15 +94,22 @@ async function compressImage(file, maxWidth = 1200, maxHeight = 1200, quality = 
 
 export async function uploadDenunciaFiles(denunciaId, files) {
   const uploadedFiles = [];
-  const maxSize = 10 * 1024 * 1024; // Reducido a 10MB por archivo para mejor UX
-  const uploadTimeout = 15000; // Reducido a 15 segundos - crítico para UX en situaciones de estrés
+  const maxSize = 50 * 1024 * 1024; // Aumentado a 50MB para documentos corporativos
+  const baseTimeout = 30000; // 30 segundos base
 
   console.log(`Iniciando upload optimizado de ${files.length} archivo(s)`);
 
   for (const file of files) {
-    console.log(`Procesando archivo: ${file.name}, tamaño original: ${(file.size / 1024).toFixed(2)}KB`);
+    console.log(`Procesando archivo: ${file.name}, tamaño original: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
 
     let processedFile = file;
+
+    // Calcular timeout dinámico basado en el tamaño del archivo
+    // Base 30s + 1s por cada 2MB adicionales
+    const sizeInMB = file.size / (1024 * 1024);
+    const uploadTimeout = Math.max(baseTimeout, baseTimeout + (sizeInMB - 2) * 500);
+
+    console.log(`Timeout calculado: ${uploadTimeout}ms para ${(file.size / 1024 / 1024).toFixed(2)}MB`);
 
     // Comprimir imágenes automáticamente si son muy grandes
     if (file.type.startsWith('image/') && file.size > 2 * 1024 * 1024) { // > 2MB
@@ -113,7 +120,7 @@ export async function uploadDenunciaFiles(denunciaId, files) {
           type: 'image/jpeg',
           lastModified: Date.now()
         });
-        console.log(`Imagen comprimida: ${(processedFile.size / 1024).toFixed(2)}KB`);
+        console.log(`Imagen comprimida: ${(processedFile.size / 1024 / 1024).toFixed(2)}MB`);
       } catch (compressError) {
         console.warn(`No se pudo comprimir ${file.name}, usando original:`, compressError);
       }
@@ -121,7 +128,7 @@ export async function uploadDenunciaFiles(denunciaId, files) {
 
     // Validar tamaño después de compresión
     if (processedFile.size > maxSize) {
-      throw new Error(`El archivo "${file.name}" es muy grande incluso después de optimización. Considera usar un archivo más pequeño o continuar sin adjuntos.`);
+      throw new Error(`El archivo "${file.name}" excede el límite de ${(maxSize / 1024 / 1024).toFixed(0)}MB. Considera dividir el documento en partes más pequeñas o comprimirlo.`);
     }
 
     // Validar tipo de archivo
@@ -137,7 +144,8 @@ export async function uploadDenunciaFiles(denunciaId, files) {
       'text/plain',
       'application/zip',
       'application/x-rar-compressed',
-      'application/x-7z-compressed'
+      'application/x-7z-compressed',
+      'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp4' // Agregando soporte para audio
     ];
 
     if (!validTypes.includes(processedFile.type) && !processedFile.type.startsWith('image/')) {
@@ -148,7 +156,7 @@ export async function uploadDenunciaFiles(denunciaId, files) {
       const fileName = `${Date.now()}-${processedFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
       const fileRef = storageRef(storage, `denuncias/${denunciaId}/${fileName}`);
 
-      console.log(`Subiendo ${processedFile.name} (${(processedFile.size / 1024).toFixed(2)}KB)...`);
+      console.log(`Subiendo ${processedFile.name} (${(processedFile.size / 1024 / 1024).toFixed(2)}MB)...`);
 
       // Timeout reducido para situaciones de estrés
       const uploadPromise = uploadBytes(fileRef, processedFile, {
@@ -156,7 +164,7 @@ export async function uploadDenunciaFiles(denunciaId, files) {
       });
 
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error(`La conexión está tardando más de lo esperado. Puedes continuar enviando tu denuncia sin este archivo.`)), uploadTimeout)
+        setTimeout(() => reject(new Error(`El archivo está tardando más de lo esperado (${Math.round(uploadTimeout/1000)}s). Si es muy grande, considera dividirlo en partes más pequeñas.`)), uploadTimeout)
       );
 
       // Intentar el upload con timeout reducido
@@ -165,7 +173,7 @@ export async function uploadDenunciaFiles(denunciaId, files) {
         console.log(`Upload completado para ${processedFile.name}`);
       } catch (timeoutError) {
         console.error(`Timeout durante upload de ${processedFile.name}:`, timeoutError);
-        throw new Error(`No se pudo subir "${processedFile.name}" en este momento. Tu denuncia se enviará sin este archivo.`);
+        throw new Error(`No se pudo subir "${processedFile.name}" en el tiempo esperado. El archivo puede ser muy grande para tu conexión actual. Considera usar archivos más pequeños o una conexión más rápida.`);
       }
 
       // Obtener URL de descarga con timeout más corto
@@ -180,7 +188,8 @@ export async function uploadDenunciaFiles(denunciaId, files) {
         name: processedFile.name,
         originalName: file.name,
         url,
-        compressed: processedFile !== file
+        compressed: processedFile !== file,
+        size: processedFile.size
       });
 
       console.log(`Archivo ${processedFile.name} procesado exitosamente`);

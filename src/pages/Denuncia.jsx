@@ -108,7 +108,7 @@ export default function Denuncia({ user }) {
       
       for (const file of attachments) {
         if (file.size > maxSizeBytes) {
-          setError(`El archivo "${file.name}" excede el límite de ${maxSizeMB}MB. Por favor reduce el tamaño.`);
+          setError(`El archivo "${file.name}" excede el límite de ${maxSizeMB}MB. Considera dividir el documento en partes más pequeñas o comprimirlo.`);
           return;
         }
       }
@@ -340,7 +340,7 @@ export default function Denuncia({ user }) {
                 <input
                   className="denuncia-input"
                   type="file"
-                  accept="image/*,.pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.7z"
+                  accept="image/*,.pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.7z,.mp3,.wav,.ogg,.m4a"
                   multiple
                   onChange={handleAttachmentChange}
                   disabled={loading}
