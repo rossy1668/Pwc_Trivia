@@ -4,7 +4,7 @@ service firebase.storage {
     // Permitir lectura pública para archivos en la carpeta denuncias
     match /denuncias/{allPaths=**} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if true; // permitir uploads incluso para usuarios anónimos
     }
 
     // Para otras ubicaciones, requerir autenticación

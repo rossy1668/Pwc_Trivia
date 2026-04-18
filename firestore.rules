@@ -1,0 +1,22 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /denuncias/{denunciaId} {
+      // Permitir creación de denuncias incluso si el usuario es anónimo
+      allow create: if true;
+      // No permitir actualizaciones o borrados desde el cliente
+      allow update, delete: if false;
+
+      // Solo usuarios RH pueden leer todas las denuncias
+      allow read: if request.auth != null && request.auth.token.email in [
+        "rrhh@pwc.com",
+        "rh@pwc.com",
+        "rh@empresa.com"
+      ];
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
