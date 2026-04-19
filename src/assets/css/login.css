@@ -1,38 +1,55 @@
-/* LOGIN PAGE — Estilos para la página de acceso */
+/* LOGIN PAGE — Estilos Globales */
 .login-page {
   min-height: 100vh;
   display: flex;
   align-items: stretch;
   font-family: 'Arial', sans-serif;
   background: #f7f7f7;
+  overflow-x: hidden; /* Evita cualquier barra de desplazamiento horizontal */
 }
 
+/* LADO IZQUIERDO: Contenedor del Video */
 .login-left {
-  flex: 1;
-  background-image: url('/assets/img/trivia-bg.jpg');
-  background-size: cover;
-  background-position: center;
+  flex: 0 0 62%; /* Proporción ideal para que el video destaque */
+  height: 100vh;
+  display: flex;
+  align-items: center;    /* CENTRADO VERTICAL */
+  justify-content: center; /* CENTRADO HORIZONTAL */
+  background: #f7f7f7; 
   position: relative;
+  overflow: hidden;
+}
+
+/* EL VIDEO RECTANGULAR */
+.login-video {
+  width: 95%;           /* Ocupa casi todo el ancho disponible de su columna */
+  max-width: 1050px;    /* Límite para que no se vea gigante en monitores Pro */
+  height: auto;
+  aspect-ratio: 16 / 9; /* Mantiene proporción de cine impecable */
+  object-fit: cover;    /* Llena el rectángulo sin dejar bordes negros internos */
+  border-radius: 12px;
+  box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+  display: block;
+}
+
+/* Desactivamos overlays que oscurecen el video */
+.login-left::after {
   display: none;
 }
 
-.login-left::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.25);
-}
-
+/* LADO DERECHO: Formulario */
 .login-right {
-  width: 100%;
-  max-width: 480px;
-  padding: 48px 40px;
+  flex: 1; 
+  padding: 48px 60px; /* Un poco más de aire lateral para el formulario */
   display: flex;
   flex-direction: column;
   justify-content: center;
   background: #fff;
+  z-index: 10;
+  box-shadow: -10px 0 30px rgba(0,0,0,0.02);
 }
 
+/* HEADER DEL LOGIN */
 .login-header {
   display: flex;
   align-items: center;
@@ -65,6 +82,7 @@
   margin-bottom: 28px;
 }
 
+/* FORMULARIO Y CAMPOS */
 .login-form {
   width: 100%;
 }
@@ -87,10 +105,8 @@
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 0.95rem;
-  font-family: 'Arial', sans-serif;
-  color: #2D2D2D;
-  transition: border-color 0.2s;
   outline: none;
+  transition: border-color 0.2s;
 }
 
 .field input:focus {
@@ -119,8 +135,7 @@
   font-weight: 500;
 }
 
-.field-row a:hover { text-decoration: underline; }
-
+/* BOTÓN PRINCIPAL (Ingresar) */
 #btn-signin {
   width: 100%;
   padding: 13px;
@@ -131,22 +146,21 @@
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  font-family: 'Arial', sans-serif;
   transition: background 0.2s;
   margin-bottom: 14px;
 }
 
 #btn-signin:hover { background: #E0301E; }
 
+/* DIVISOR */
 .divider {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 20px;
 }
 
-.divider::before,
-.divider::after {
+.divider::before, .divider::after {
   content: '';
   flex: 1;
   height: 1px;
@@ -158,81 +172,46 @@
   color: #aaa;
 }
 
+/* BOTÓN DE GOOGLE CORREGIDO */
 #btn-google {
   width: 100%;
-  padding: 12px;
+  padding: 11px; /* Ajustado para que sea simétrico al de Ingresar */
   background: #fff;
   color: #2D2D2D;
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 0.95rem;
   font-weight: 500;
-  cursor: pointer;
-  font-family: 'Arial', sans-serif;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  transition: background 0.2s, border-color 0.2s;
+  cursor: pointer;
+  transition: all 0.2s ease;
   margin-bottom: 24px;
 }
 
 #btn-google:hover {
-  background: #f5f5f5;
-  border-color: #bbb;
+  background: #f9f9f9;
+  border-color: #ccc;
 }
 
 #btn-google svg {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
 }
 
-.signup-row {
-  text-align: center;
-  font-size: 0.85rem;
-  color: #888;
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+  .login-left { flex: 0 0 50%; }
 }
 
-.signup-row a,
-.signup-row .signup-link {
-  color: #E0301E;
-  font-weight: 600;
-  text-decoration: none;
-  background: none;
-  border: none;
-  padding: 0;
-  font: inherit;
-  cursor: pointer;
-}
-
-.signup-row a:hover,
-.signup-row .signup-link:hover { text-decoration: underline; }
-
-.login-alert {
-  border-radius: 8px;
-  padding: 14px 16px;
-  margin-bottom: 18px;
-  font-size: 0.94rem;
-}
-
-.login-alert.error {
-  background: #fff0ee;
-  border: 1px solid #E0301E;
-  color: #c0392b;
-}
-
-.login-alert.success {
-  background: #ecf8f1;
-  border: 1px solid #22c55e;
-  color: #176e3d;
-}
-
-.btn-google {
-  display: inline-flex;
-}
-
-@media (min-width: 900px) {
-  .login-left { display: block; }
-  .login-right { max-width: 460px; }
+@media (max-width: 899px) {
+  .login-left {
+    display: none; /* Oculta el video en pantallas pequeñas */
+  }
+  .login-right {
+    padding: 40px 24px;
+  }
 }

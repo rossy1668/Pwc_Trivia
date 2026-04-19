@@ -9,7 +9,7 @@ import {
   updateProfile
 } from "firebase/auth";
 import { getFirestore, collection, doc, setDoc, serverTimestamp, query, where, getDocs } from "firebase/firestore";
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCmKuHHsxJRss0n7J4z5SxEgof2Syabuog",
@@ -20,11 +20,14 @@ const firebaseConfig = {
   appId: "1:588221102437:web:776bd6ae86d3f2aa8ac98c"
 };
 
+// Inicialización
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const googleProvider = new GoogleAuthProvider();
+
+// --- AUTH FUNCTIONS ---
 
 export async function signInWithEmail(email, password) {
   return signInWithEmailAndPassword(auth, email, password);
@@ -46,6 +49,8 @@ export async function signOutUser() {
   return signOut(auth);
 }
 
+// --- TRIVIA FUNCTIONS ---
+
 export async function saveTriviaResult(score, total, answers = null) {
   if (!auth.currentUser) {
     throw new Error('Debes iniciar sesión para guardar el resultado.');
@@ -59,7 +64,7 @@ export async function saveTriviaResult(score, total, answers = null) {
     puntaje: score,
     total,
     porcentaje: Math.round((score / total) * 100),
-    respuestas: answers, // Array con las respuestas individuales si se proporciona
+    respuestas: answers,
     fecha: serverTimestamp()
   });
 
@@ -69,24 +74,16 @@ export async function saveTriviaResult(score, total, answers = null) {
 export async function getTriviaStatistics() {
   const resultadosRef = collection(db, 'resultados_trivia');
   const querySnapshot = await getDocs(resultadosRef);
-
-  const results = querySnapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  }));
-
-  return results;
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 }
 
-// Función para comprimir imágenes automáticamente
-async function compressImage(file, maxWidth = 1200, maxHeight = 1200, quality = 0.8) {
-  return new Promise((resolve) => {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    const img = new Image();
+// --- HELPER: COMPRESIÓN DE IMÁGENES ---
 
+async function compressImage(file, maxWidth = 800, maxHeight = 800, quality = 0.6) {
+  return new Promise((resolve) => {
+    const img = new Image();
     img.onload = () => {
-      // Calcular nuevas dimensiones manteniendo aspect ratio
+      const canvas = document.createElement('canvas');
       let { width, height } = img;
 
       if (width > maxWidth || height > maxHeight) {
@@ -97,158 +94,26 @@ async function compressImage(file, maxWidth = 1200, maxHeight = 1200, quality = 
 
       canvas.width = width;
       canvas.height = height;
-
-      // Dibujar y comprimir
+      const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, width, height);
-
-      // Preservar formato original cuando sea posible, usar JPEG solo como fallback
-      const originalFormat = file.type.toLowerCase();
-      let outputFormat = 'image/jpeg'; // fallback
-
-      if (originalFormat === 'image/png') {
-        outputFormat = 'image/png';
-      } else if (originalFormat === 'image/webp') {
-        outputFormat = 'image/webp';
-      } else if (originalFormat === 'image/gif') {
-        // GIF no se puede comprimir bien con canvas, mantener original
-        resolve(file);
-        return;
-      }
-
-      canvas.toBlob(resolve, outputFormat, quality);
+      
+      canvas.toBlob((blob) => {
+        resolve(blob);
+      }, 'image/jpeg', quality);
     };
-
     img.src = URL.createObjectURL(file);
   });
 }
 
-export async function uploadDenunciaFiles(denunciaId, files) {
-  const uploadedFiles = [];
-  const maxSize = 25 * 1024 * 1024; // Reducido a 25MB para mejor UX - equilibrio entre necesidad corporativa y velocidad
-  const baseTimeout = 15000; // Reducido a 15 segundos - crítico para UX en situaciones de estrés
-
-  console.log(`Iniciando upload optimizado de ${files.length} archivo(s)`);
-
-  for (const file of files) {
-    console.log(`Procesando archivo: ${file.name}, tamaño original: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
-
-    let processedFile = file;
-
-    // Timeout más corto y fijo para consistencia
-    const uploadTimeout = baseTimeout;
-
-    // Compresión más agresiva para velocidad
-    if (file.type.startsWith('image/') && file.size > 1 * 1024 * 1024) { // > 1MB
-      try {
-        console.log(`Comprimiendo imagen agresivamente ${file.name}...`);
-        // Compresión más agresiva: menor calidad y tamaño
-        const compressedBlob = await compressImage(file, 800, 800, 0.6);
-        processedFile = new File([compressedBlob], file.name, {
-          type: 'image/jpeg',
-          lastModified: Date.now()
-        });
-        console.log(`Imagen comprimida: ${(processedFile.size / 1024 / 1024).toFixed(2)}MB`);
-      } catch (compressError) {
-        console.warn(`No se pudo comprimir ${file.name}, usando original:`, compressError);
-      }
-    }
-
-    // Validar tamaño después de compresión
-    if (processedFile.size > maxSize) {
-      console.warn(`Archivo ${file.name} demasiado grande (${(processedFile.size / 1024 / 1024).toFixed(2)}MB > ${(maxSize / 1024 / 1024).toFixed(0)}MB), saltando...`);
-      continue; // Saltar archivo en lugar de fallar completamente
-    }
-
-    // Validar tipo de archivo
-    const validTypes = [
-      'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp', 'image/tiff',
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/vnd.ms-excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'application/vnd.ms-powerpoint',
-      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-      'text/plain',
-      'application/zip',
-      'application/x-rar-compressed',
-      'application/x-7z-compressed',
-      'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp4' // Agregando soporte para audio
-    ];
-
-    if (!validTypes.includes(processedFile.type) && !processedFile.type.startsWith('image/')) {
-      console.warn(`Tipo de archivo ${processedFile.type} no soportado, saltando ${file.name}...`);
-      continue;
-    }
-
-    try {
-      const fileName = `${Date.now()}-${processedFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-      const fileRef = storageRef(storage, `denuncias/${denunciaId}/${fileName}`);
-
-      console.log(`Subiendo ${processedFile.name} (${(processedFile.size / 1024 / 1024).toFixed(2)}MB)...`);
-
-      // Timeout reducido para situaciones de estrés
-      const uploadPromise = uploadBytes(fileRef, processedFile, {
-        contentType: processedFile.type || 'application/octet-stream'
-      });
-
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error(`Timeout: Archivo muy grande para subir ahora`)), uploadTimeout)
-      );
-
-      // Intentar el upload con timeout más corto
-      try {
-        await Promise.race([uploadPromise, timeoutPromise]);
-        console.log(`Upload completado para ${processedFile.name}`);
-      } catch (timeoutError) {
-        console.error(`Timeout durante upload de ${processedFile.name}:`, timeoutError);
-        console.log(`Saltando archivo ${processedFile.name} por timeout - denuncia se enviará sin él`);
-        continue; // Continuar con otros archivos
-      }
-
-      // Obtener URL de descarga con timeout más corto
-      const urlPromise = getDownloadURL(fileRef);
-      const urlTimeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error(`Error obteniendo enlace para "${processedFile.name}"`)), 10000)
-      );
-
-      const url = await Promise.race([urlPromise, urlTimeoutPromise]);
-
-      uploadedFiles.push({
-        name: processedFile.name,
-        originalName: file.name,
-        url,
-        compressed: processedFile !== file,
-        size: processedFile.size,
-        type: processedFile.type || file.type
-      });
-
-      console.log(`✅ Archivo procesado exitosamente:`, {
-        originalName: file.name,
-        processedName: processedFile.name,
-        url: url.substring(0, 50) + '...',
-        compressed: processedFile !== file,
-        size: processedFile.size,
-        type: processedFile.type || file.type
-      });
-
-    } catch (fileError) {
-      console.error(`Error procesando ${processedFile.name}:`, fileError);
-      // En lugar de fallar completamente, continuar con otros archivos
-      console.warn(`Saltando archivo problemático: ${processedFile.name}`);
-    }
-  }
-
-  console.log(`Upload completado. ${uploadedFiles.length} de ${files.length} archivo(s) procesado(s)`);
-  return uploadedFiles;
-}
+// --- CLOUDINARY UPLOAD ---
 
 async function uploadToCloudinary(file, denunciaId) {
-VITE_CLOUDINARY_CLOUD_NAME=dvy6lz7kg
-VITE_CLOUDINARY_UPLOAD_PRESET=Trivia_PWC
+  // Asegúrate de tener estas variables en tu archivo .env
+  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+  const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
   if (!cloudName || !uploadPreset) {
-    throw new Error('Configura VITE_CLOUDINARY_CLOUD_NAME y VITE_CLOUDINARY_UPLOAD_PRESET en tu .env');
+    throw new Error('Faltan credenciales de Cloudinary en variables de entorno.');
   }
 
   const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
@@ -256,104 +121,66 @@ VITE_CLOUDINARY_UPLOAD_PRESET=Trivia_PWC
 
   formData.append('file', file);
   formData.append('upload_preset', uploadPreset);
-  formData.append('resource_type', 'auto');
   formData.append('folder', `denuncias/${denunciaId}`);
   formData.append('public_id', `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9_-]/g, '_')}`);
 
-  const response = await fetch(cloudinaryUrl, {
-    method: 'POST',
-    body: formData
-  });
+  const response = await fetch(cloudinaryUrl, { method: 'POST', body: formData });
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Cloudinary upload failed: ${response.status} ${errorText}`);
+    throw new Error(`Cloudinary Error: ${response.status} ${errorText}`);
   }
 
   return response.json();
 }
 
+// --- DENUNCIAS FUNCTIONS ---
+
 export async function uploadDenunciaFiles(denunciaId, files) {
   const uploadedFiles = [];
-  const maxSize = 25 * 1024 * 1024;
-  const baseTimeout = 15000;
-
-  console.log(`Iniciando upload optimizado de ${files.length} archivo(s)`);
+  const maxSize = 25 * 1024 * 1024; // 25MB
+  const uploadTimeout = 20000; // 20 segundos
 
   for (const file of files) {
-    console.log(`Procesando archivo: ${file.name}, tamaño original: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
-
     let processedFile = file;
-    const uploadTimeout = baseTimeout;
 
+    // 1. Compresión si es imagen pesada
     if (file.type.startsWith('image/') && file.size > 1 * 1024 * 1024) {
       try {
-        console.log(`Comprimiendo imagen agresivamente ${file.name}...`);
-        const compressedBlob = await compressImage(file, 800, 800, 0.6);
-        processedFile = new File([compressedBlob], file.name, {
-          type: file.type,
-          lastModified: Date.now()
-        });
-        console.log(`Imagen comprimida: ${(processedFile.size / 1024 / 1024).toFixed(2)}MB`);
-      } catch (compressError) {
-        console.warn(`No se pudo comprimir ${file.name}, usando original:`, compressError);
+        const compressedBlob = await compressImage(file);
+        processedFile = new File([compressedBlob], file.name, { type: 'image/jpeg' });
+      } catch (e) {
+        console.warn("Error comprimiendo, se usará original", e);
       }
     }
 
+    // 2. Validación de tamaño
     if (processedFile.size > maxSize) {
-      console.warn(`Archivo ${file.name} demasiado grande (${(processedFile.size / 1024 / 1024).toFixed(2)}MB > ${(maxSize / 1024 / 1024).toFixed(0)}MB), saltando...`);
+      console.warn(`Archivo ${file.name} excede el límite.`);
       continue;
     }
 
-    const validTypes = [
-      'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp', 'image/tiff',
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/vnd.ms-excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'application/vnd.ms-powerpoint',
-      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-      'text/plain',
-      'application/zip',
-      'application/x-rar-compressed',
-      'application/x-7z-compressed',
-      'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp4'
-    ];
-
-    if (!validTypes.includes(processedFile.type) && !processedFile.type.startsWith('image/')) {
-      console.warn(`Tipo de archivo ${processedFile.type} no soportado, saltando ${file.name}...`);
-      continue;
-    }
-
+    // 3. Intento de subida con Timeout
     try {
-      console.log(`Subiendo ${processedFile.name} a Cloudinary...`);
       const uploadPromise = uploadToCloudinary(processedFile, denunciaId);
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error(`Timeout: Archivo muy grande para subir ahora`)), uploadTimeout)
+        setTimeout(() => reject(new Error('Timeout en subida')), uploadTimeout)
       );
 
       const result = await Promise.race([uploadPromise, timeoutPromise]);
-      const url = result.secure_url || result.url;
-
+      
       uploadedFiles.push({
         name: processedFile.name,
-        originalName: file.name,
-        url,
-        compressed: processedFile !== file,
+        url: result.secure_url || result.url,
         size: processedFile.size,
-        type: processedFile.type || file.type,
+        type: processedFile.type,
         provider: 'cloudinary'
       });
-
-      console.log(`Archivo ${processedFile.name} procesado exitosamente: ${url}`);
-    } catch (fileError) {
-      console.error(`Error procesando ${processedFile.name}:`, fileError);
-      console.warn(`Saltando archivo problemático: ${processedFile.name}`);
+    } catch (error) {
+      console.error(`Error al subir ${file.name}:`, error);
     }
   }
 
-  console.log(`Upload completado. ${uploadedFiles.length} de ${files.length} archivo(s) procesado(s)`);
   return uploadedFiles;
 }
 
@@ -370,30 +197,19 @@ export async function submitDenuncia(denunciaData, id = null) {
         }
       : null,
     fecha: serverTimestamp()
-  });
+  }, { merge: true });
 
   return denunciaRef.id;
 }
 
 export async function fetchDenunciasByEmail(email) {
   if (!email) return [];
-
-  const denunciasRef = collection(db, 'denuncias');
-  const denunciasQuery = query(denunciasRef, where('usuario.email', '==', email));
-  const querySnapshot = await getDocs(denunciasQuery);
-
-  return querySnapshot.docs.map((docItem) => ({
-    id: docItem.id,
-    ...docItem.data()
-  }));
+  const q = query(collection(db, 'denuncias'), where('usuario.email', '==', email));
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
 export async function fetchAllDenuncias() {
-  const denunciasRef = collection(db, 'denuncias');
-  const querySnapshot = await getDocs(denunciasRef);
-
-  return querySnapshot.docs.map((docItem) => ({
-    id: docItem.id,
-    ...docItem.data()
-  }));
+  const snap = await getDocs(collection(db, 'denuncias'));
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
