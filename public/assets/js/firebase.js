@@ -27,7 +27,7 @@ onAuthStateChanged(auth, user => {
 
   userId = user.uid;
   document.getElementById('loading').style.display = 'none';
-  iniciarTrivia();
+  window.iniciarTrivia?.();
 });
 
 window.guardarEnFirebase = async function(puntaje, total) {

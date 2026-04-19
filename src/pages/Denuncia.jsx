@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+﻿import { useCallback, useEffect, useState } from "react";
 import { collection, doc } from "firebase/firestore";
 import { db, submitDenuncia, uploadDenunciaFiles, fetchDenunciasByEmail, fetchAllDenuncias } from "../firebase";
 import "./Denuncia.css";
@@ -66,7 +66,7 @@ export default function Denuncia({ user }) {
 
   const isHrUser = user?.email ? approvedHrEmails.includes(user.email.toLowerCase()) : false;
 
-  const loadDenuncias = async () => {
+  const loadDenuncias = useCallback(async () => {
     if (!user?.email) {
       setDenuncias([]);
       return;
@@ -81,11 +81,11 @@ export default function Denuncia({ user }) {
     } catch (error) {
       console.error("Error cargando denuncias:", error);
     }
-  };
+  }, [user, isHrUser]);
 
   useEffect(() => {
     loadDenuncias();
-  }, [user, isHrUser]);
+  }, [loadDenuncias]);
 
   const handleAttachmentChange = (event) => {
     const files = Array.from(event.target.files || []);

@@ -71,12 +71,6 @@ export default function Trivia() {
 
   const isHrUser = user?.email ? approvedHrEmails.includes(user.email.toLowerCase()) : false;
 
-  // Si es usuario de RH, mostrar dashboard analítico
-  if (isHrUser) {
-    return <AnalyticsDashboard user={user} />;
-  }
-
-  // Componente de trivia normal para usuarios regulares
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState(null);
@@ -90,11 +84,6 @@ export default function Trivia() {
   const progress = Math.round(((currentIndex + 1) / preguntas.length) * 100);
   const resultLink = score < 5 ? "/leyes" : "/guia";
   const resultButtonText = score < 5 ? "Revisar leyes" : "Ver guía de acción";
-  const resultDescription = score > 7
-    ? "Has demostrado un buen entendimiento de los derechos y los límites en el ámbito laboral."
-    : score > 4
-      ? "La prevención comienza con la información; revisa la guía y la sección de leyes para reforzar lo aprendido."
-      : "La prevención comienza con la información; revisa la sección de leyes para reforzar lo aprendido.";
 
   useEffect(() => {
     if (!showResult || saved) return;
@@ -108,6 +97,10 @@ export default function Trivia() {
         setSaveMessage('No se pudo guardar el resultado. Inicia sesión para registrar.');
       });
   }, [showResult, saved, score]);
+
+  if (isHrUser) {
+    return <AnalyticsDashboard />;
+  }
 
   const responder = (index) => {
     if (answered) return;

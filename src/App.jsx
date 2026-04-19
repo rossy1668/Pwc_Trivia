@@ -14,7 +14,6 @@ const basePath = import.meta.env.BASE_URL;
 
 function Navbar({ user, onSignOut }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const location = useLocation();
 
   const logoutButtonStyle = {
     background: "transparent",
@@ -26,10 +25,6 @@ function Navbar({ user, onSignOut }) {
     fontWeight: 500,
     textDecoration: "underline"
   };
-
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [location.pathname]);
 
   return (
     <header id="header">
@@ -50,11 +45,11 @@ function Navbar({ user, onSignOut }) {
           <span />
         </button>
         <nav className={mobileMenuOpen ? "open" : ""}>
-          <NavLink to="/home" className={({ isActive }) => (isActive ? "active" : "")}>Inicio</NavLink>
-          <NavLink to="/trivia" className={({ isActive }) => (isActive ? "active" : "")}>Trivia</NavLink>
-          <NavLink to="/guia" className={({ isActive }) => (isActive ? "active" : "")}>Guía</NavLink>
-          <NavLink to="/leyes" className={({ isActive }) => (isActive ? "active" : "")}>Leyes</NavLink>
-          <NavLink to="/denuncia" className={({ isActive }) => (isActive ? "active" : "")}>Denuncia</NavLink>
+          <NavLink to="/home" className={({ isActive }) => (isActive ? "active" : "")} onClick={() => setMobileMenuOpen(false)}>Inicio</NavLink>
+          <NavLink to="/trivia" className={({ isActive }) => (isActive ? "active" : "")} onClick={() => setMobileMenuOpen(false)}>Trivia</NavLink>
+          <NavLink to="/guia" className={({ isActive }) => (isActive ? "active" : "")} onClick={() => setMobileMenuOpen(false)}>Guía</NavLink>
+          <NavLink to="/leyes" className={({ isActive }) => (isActive ? "active" : "")} onClick={() => setMobileMenuOpen(false)}>Leyes</NavLink>
+          <NavLink to="/denuncia" className={({ isActive }) => (isActive ? "active" : "")} onClick={() => setMobileMenuOpen(false)}>Denuncia</NavLink>
           {user ? (
             <button type="button" style={logoutButtonStyle} onClick={onSignOut}>
               Cerrar sesión

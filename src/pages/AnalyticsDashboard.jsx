@@ -1,16 +1,12 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getTriviaStatistics } from "../firebase";
 import "../assets/css/trivia.css";
 
-export default function AnalyticsDashboard({ user }) {
+export default function AnalyticsDashboard() {
   const [statistics, setStatistics] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadStatistics();
-  }, []);
-
-  const loadStatistics = async () => {
+  const loadStatistics = useCallback(async () => {
     try {
       const results = await getTriviaStatistics();
       setStatistics(calculateStats(results));
@@ -19,7 +15,11 @@ export default function AnalyticsDashboard({ user }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadStatistics();
+  }, [loadStatistics]);
 
   const calculateStats = (results) => {
     if (!results || results.length === 0) {
