@@ -10,25 +10,23 @@
 
 /* LADO IZQUIERDO: Contenedor del Video */
 .login-left {
-  flex: 0 0 62%; /* Proporción ideal para que el video destaque */
-  height: 100vh;
+  flex: 0 0 62%;
+  min-height: 100vh;
   display: flex;
-  align-items: center;    /* CENTRADO VERTICAL */
-  justify-content: center; /* CENTRADO HORIZONTAL */
-  background: #f7f7f7; 
+  align-items: stretch;
+  justify-content: stretch;
+  background: #f7f7f7;
   position: relative;
   overflow: hidden;
 }
 
 /* EL VIDEO RECTANGULAR */
 .login-video {
-  width: 95%;           /* Ocupa casi todo el ancho disponible de su columna */
-  max-width: 1050px;    /* Límite para que no se vea gigante en monitores Pro */
-  height: auto;
-  aspect-ratio: 16 / 9; /* Mantiene proporción de cine impecable */
-  object-fit: cover;    /* Llena el rectángulo sin dejar bordes negros internos */
-  border-radius: 12px;
-  box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+  box-shadow: none;
   display: block;
 }
 
