@@ -7,22 +7,31 @@ export default function AnalyticsDashboard() {
   const [statistics, setStatistics] = useState(null);
   const [denuncias, setDenuncias] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const loadStatistics = useCallback(async () => {
     try {
+      setError(null);
       const results = await getTriviaStatistics();
       setStatistics(calculateStats(results));
     } catch (error) {
       console.error('Error loading statistics:', error);
+      setError('Error al cargar las estadísticas');
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    loadStatistics();
-    fetchDenuncias();
-  }, [loadStatistics]);
+  const fetchDenuncias = async () => {
+    try {
+      const querySnapshot = await getDocs(query(collection(db, 'denuncias'), orderBy('timestamp', 'desc')));
+      const denunciasData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setDenuncias(denunciasData);
+    } catch (error) {
+      console.error('Error fetching denuncias:', error);
+      setError('Error al cargar las denuncias');
+    }
+  };
 
   const calculateStats = (results) => {
     if (!results || results.length === 0) {
@@ -68,15 +77,10 @@ export default function AnalyticsDashboard() {
     };
   };
 
-  const fetchDenuncias = async () => {
-    try {
-      const querySnapshot = await getDocs(query(collection(db, 'denuncias'), orderBy('timestamp', 'desc')));
-      const denunciasData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setDenuncias(denunciasData);
-    } catch (error) {
-      console.error('Error fetching denuncias:', error);
-    }
-  };
+  useEffect(() => {
+    loadStatistics();
+    fetchDenuncias();
+  }, [loadStatistics]);
 
   if (loading) {
     return (
@@ -89,12 +93,26 @@ export default function AnalyticsDashboard() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="trivia-container">
+        <div className="trivia-header">
+          <h1>Dashboard Analítico RH</h1>
+          <p style={{ color: 'red' }}>{error}</p>
+          <button onClick={() => { setLoading(true); setError(null); loadStatistics(); fetchDenuncias(); }}>
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!statistics) {
     return (
       <div className="trivia-container">
         <div className="trivia-header">
           <h1>Dashboard Analítico RH</h1>
-          <p>Error al cargar las estadísticas.</p>
+          <p>No hay datos disponibles.</p>
         </div>
       </div>
     );
