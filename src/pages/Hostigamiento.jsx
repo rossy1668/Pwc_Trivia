@@ -1,12 +1,8 @@
 import React from 'react';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 
 const Hostigamiento = () => {
   return (
     <div className="hostigamiento-page">
-      <Navbar />
-
       {/* Hero Section */}
       <section className="leyes-hero">
         <img
@@ -54,8 +50,6 @@ const Hostigamiento = () => {
           </p>
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 };

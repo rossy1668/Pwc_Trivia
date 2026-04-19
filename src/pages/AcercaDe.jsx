@@ -1,12 +1,8 @@
 import React from 'react';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 
 const AcercaDe = () => {
   return (
     <div className="acerca-de-page">
-      <Navbar />
-
       {/* Hero Section */}
       <section className="leyes-hero">
         <img
@@ -49,8 +45,6 @@ const AcercaDe = () => {
           <br />
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 };
