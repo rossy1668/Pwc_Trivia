@@ -77,6 +77,8 @@ export default function AnalyticsDashboard() {
       console.error('Error fetching denuncias:', error);
     }
   };
+
+  if (loading) {
     return (
       <div className="trivia-container">
         <div className="trivia-header">
@@ -255,4 +257,4 @@ export default function AnalyticsDashboard() {
       </div>
     </div>
   );
-}
+};
