@@ -7,6 +7,8 @@
   "scripts": {
     "predeploy": "cross-env GH_PAGES=true npm run build",
     "deploy": "gh-pages -d dist",
+    "deploy:main": "git checkout main && npm run deploy",
+    "deploy:gh-pages": "git checkout gh-pages && npm run deploy",
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",

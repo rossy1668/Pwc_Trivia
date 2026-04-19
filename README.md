@@ -1,16 +1,111 @@
-# React + Vite
+# PwC Trivia - Respeto Sin Excepciones
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicación web interactiva para la prevención del hostigamiento sexual laboral, desarrollada para PwC Perú como parte del Hackathon +ChicasTec.
 
-Currently, two official plugins are available:
+## 🚀 Características
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Trivia Interactiva**: Evaluación de conocimientos sobre hostigamiento sexual
+- **Sistema de Denuncias**: Plataforma segura para reportar incidentes
+- **Dashboard Analítico**: Panel de control para visualizar estadísticas y denuncias
+- **Información Educativa**: Contenido sobre prevención y derechos laborales
+- **Responsive Design**: Optimizado para dispositivos móviles y desktop
 
-## React Compiler
+## 🛠️ Tecnologías
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **React 19.2.0** - Framework principal
+- **Vite 7.3.1** - Build tool y desarrollo
+- **Firebase** - Base de datos y autenticación
+- **React Router** - Navegación
+- **GitHub Pages** - Despliegue
 
-## Expanding the ESLint configuration
+## 📦 Instalación
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+# Clonar el repositorio
+git clone https://github.com/rossy1668/Pwc_Trivia.git
+cd Pwc_Trivia
+
+# Instalar dependencias
+npm install
+
+# Ejecutar en desarrollo
+npm run dev
+```
+
+## 🚀 Despliegue
+
+### Despliegue Automático (GitHub Actions)
+
+El proyecto está configurado para desplegar automáticamente en GitHub Pages cuando se hace push a las ramas `main` o `gh-pages`.
+
+### Despliegue Manual
+
+```bash
+# Desplegar desde main
+npm run deploy:main
+
+# Desplegar desde gh-pages
+npm run deploy:gh-pages
+
+# O desplegar directamente
+npm run deploy
+```
+
+### Configuración de GitHub Pages
+
+1. Ve a **Settings** → **Pages** en tu repositorio de GitHub
+2. Selecciona **Deploy from a branch**
+3. Elige la rama `gh-pages` y carpeta `/ (root)`
+4. La URL será: `https://rossy1668.github.io/Pwc_Trivia`
+
+## 📁 Estructura del Proyecto
+
+```
+src/
+├── components/          # Componentes reutilizables
+├── pages/              # Páginas principales
+├── assets/             # Estilos e imágenes
+├── data/               # Datos estáticos
+└── firebase.js         # Configuración de Firebase
+
+public/
+├── assets/             # Recursos estáticos
+└── pages/              # Archivos HTML (legacy)
+```
+
+## 🔧 Scripts Disponibles
+
+- `npm run dev` - Servidor de desarrollo
+- `npm run build` - Construir para producción
+- `npm run preview` - Vista previa del build
+- `npm run deploy` - Desplegar a GitHub Pages
+- `npm run lint` - Ejecutar ESLint
+
+## 🌐 Rutas de la Aplicación
+
+- `/` - Redirección a login
+- `/home` - Página principal
+- `/trivia` - Trivia interactiva
+- `/guia` - Guía de acción
+- `/leyes` - Información legal
+- `/acercade` - Acerca del micrositio
+- `/hostigamiento` - ¿Qué es el hostigamiento?
+- `/denuncia` - Formulario de denuncias
+- `/login` - Inicio de sesión
+
+## 📊 Dashboard Analítico
+
+Accesible en `/analytics` (requiere autenticación), muestra:
+- Estadísticas de participación en la trivia
+- Tasas de aprobación y rendimiento
+- Lista completa de denuncias registradas
+- Insights y recomendaciones
+
+## 🔒 Configuración de Firebase
+
+Asegúrate de configurar las variables de entorno para Firebase en tu proyecto.
+
+## 📝 Licencia
+
+Desarrollado para PwC Perú - Hackathon +ChicasTec 2025
+"El silencio no protege, el conocimiento sí."
