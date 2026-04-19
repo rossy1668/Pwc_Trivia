@@ -171,10 +171,12 @@ export async function uploadDenunciaFiles(denunciaId, files) {
       
       uploadedFiles.push({
         name: processedFile.name,
+        nombre: processedFile.name,
         url: result.secure_url || result.url,
         size: processedFile.size,
         type: processedFile.type,
-        provider: 'cloudinary'
+        provider: 'cloudinary',
+        compressed: processedFile !== file
       });
     } catch (error) {
       console.error(`Error al subir ${file.name}:`, error);
@@ -196,7 +198,8 @@ export async function submitDenuncia(denunciaData, id = null) {
           nombre: auth.currentUser.displayName || auth.currentUser.email?.split('@')[0] || ''
         }
       : null,
-    fecha: serverTimestamp()
+    fecha: serverTimestamp(),
+    timestamp: serverTimestamp()
   }, { merge: true });
 
   return denunciaRef.id;

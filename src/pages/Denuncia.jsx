@@ -148,6 +148,7 @@ export default function Denuncia({ user }) {
           responsable,
           descripcion,
           attachments: uploadedFiles,
+          archivos: uploadedFiles,
           caseNumber: caso,
           uploadWarnings: uploadWarnings.length > 0 ? uploadWarnings : null
         },
@@ -214,15 +215,18 @@ export default function Denuncia({ user }) {
                     <p className="denuncia-panel-field"><strong>Área incidente:</strong> {denunciaItem.areaIncidente || 'No indicado'}</p>
                     <p className="denuncia-panel-field"><strong>Responsable:</strong> {denunciaItem.responsable || 'No indicado'}</p>
                     <p className="denuncia-panel-field"><strong>Descripción:</strong> {denunciaItem.descripcion}</p>
-                    {denunciaItem.attachments?.length > 0 && (
+                    {(
+                      (denunciaItem.attachments && denunciaItem.attachments.length > 0) ||
+                      (denunciaItem.archivos && denunciaItem.archivos.length > 0)
+                    ) && (
                       <div className="denuncia-panel-attachments">
                         <strong>Adjuntos:</strong>
                         <div className="attachments-grid">
-                          {denunciaItem.attachments.map((file, index) => {
+                          {(denunciaItem.attachments || denunciaItem.archivos).map((file, index) => {
                             console.log('Procesando archivo:', index, file);
 
                             // Mejor detección de imágenes - verificar múltiples formas
-                            const fileName = file.originalName || file.name || '';
+const fileName = file.nombre || file.originalName || file.name || '';
                             const fileUrl = file.url || '';
 
                             const isImage = fileName.match(/\.(jpg|jpeg|png|gif|webp|bmp|tiff)$/i) ||
@@ -292,7 +296,11 @@ export default function Denuncia({ user }) {
               También puedes enviar un correo a <a href="mailto:denuncias@pwc.com?subject=Denuncia%20PwC">denuncias@pwc.com</a> si lo prefieres.
             </div>
 
-            {message && <div className="denuncia-alert denuncia-success">{message}</div>}
+            {message && (
+              <div className="denuncia-alert denuncia-success" style={{ whiteSpace: 'pre-line' }}>
+                {message}
+              </div>
+            )}
             {error && <div className="denuncia-alert denuncia-error">{error}</div>}
 
             {/* Indicador de borrador guardado */}

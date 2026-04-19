@@ -24,8 +24,10 @@ export default function AnalyticsDashboard() {
 
   const fetchDenuncias = async () => {
     try {
-      const querySnapshot = await getDocs(query(collection(db, 'denuncias'), orderBy('timestamp', 'desc')));
-      const denunciasData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const querySnapshot = await getDocs(collection(db, 'denuncias'));
+      const denunciasData = querySnapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .sort((a, b) => (b.timestamp?.seconds || b.fecha?.seconds || 0) - (a.timestamp?.seconds || a.fecha?.seconds || 0));
       setDenuncias(denunciasData);
     } catch (error) {
       console.error('Error fetching denuncias:', error);
