@@ -2,6 +2,7 @@
 import { useNavigate } from 'react-router-dom';
 import '../assets/css/login.css';
 import { signInWithEmail, signInWithGoogle, signUpWithEmail } from '../firebase';
+import videoFondo from '../assets/Diseño sin título (1).mp4';
 
 const basePath = import.meta.env.BASE_URL;
 
@@ -85,7 +86,14 @@ export default function Login() {
 
   return (
     <div className="login-page">
-      <div className="login-left"></div>
+
+      {/* 🔥 VIDEO EN VEZ DE IMAGEN */}
+      <div className="login-left">
+        <video autoPlay loop muted playsInline className="login-video">
+          <source src={videoFondo} type="video/mp4" />
+          Tu navegador no soporta videos.
+        </video>
+      </div>
 
       <div className="login-right">
         <div className="login-header">
