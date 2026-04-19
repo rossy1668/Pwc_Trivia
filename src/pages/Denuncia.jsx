@@ -114,28 +114,24 @@ export default function Denuncia({ user }) {
       let uploadWarnings = [];
 
       if (attachments.length > 0) {
-        try {
-          console.log("Iniciando upload de archivos...");
-          uploadedFiles = await uploadDenunciaFiles(reference.id, attachments);
-          console.log("Upload completado exitosamente");
+        console.log("Iniciando upload de archivos...");
+        const { uploadedFiles: filesUploaded, failedUploads } = await uploadDenunciaFiles(reference.id, attachments);
+        uploadedFiles = filesUploaded;
+        console.log("Upload de archivos finalizado");
 
-          // Verificar si algunos archivos no se subieron
-          if (uploadedFiles.length < attachments.length) {
-            const failedCount = attachments.length - uploadedFiles.length;
-            uploadWarnings.push(`${failedCount} archivo(s) no se pudieron subir debido a problemas de conexión, pero tu denuncia se enviará con los archivos que sí se subieron.`);
-          }
+        if (failedUploads.length > 0) {
+          failedUploads.forEach(({ fileName, error }) => {
+            uploadWarnings.push(`No se pudo subir ${fileName}: ${error}`);
+          });
+        }
 
-          // Verificar si hay archivos comprimidos
-          const compressedFiles = uploadedFiles.filter(f => f.compressed);
-          if (compressedFiles.length > 0) {
-            uploadWarnings.push(`Se optimizaron ${compressedFiles.length} imagen(es) para subir más rápido.`);
-          }
+        if (uploadedFiles.length < attachments.length) {
+          uploadWarnings.push(`Tu denuncia se enviará con los archivos que sí se subieron.`);
+        }
 
-        } catch (uploadError) {
-          console.error("Error en upload:", uploadError);
-          // NO detener el proceso - permitir enviar sin archivos
-          uploadWarnings.push(`Los archivos adjuntos no se pudieron subir: ${uploadError.message}. Tu denuncia se enviará sin adjuntos.`);
-          console.log("Continuando con el envío de la denuncia sin archivos adjuntos...");
+        const compressedFiles = uploadedFiles.filter(f => f.compressed);
+        if (compressedFiles.length > 0) {
+          uploadWarnings.push(`Se optimizaron ${compressedFiles.length} imagen(es) para subir más rápido.`);
         }
       }
 

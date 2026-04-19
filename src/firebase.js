@@ -138,6 +138,7 @@ async function uploadToCloudinary(file, denunciaId) {
 
 export async function uploadDenunciaFiles(denunciaId, files) {
   const uploadedFiles = [];
+  const failedUploads = [];
   const maxSize = 25 * 1024 * 1024; // 25MB
   const uploadTimeout = 20000; // 20 segundos
 
@@ -168,7 +169,6 @@ export async function uploadDenunciaFiles(denunciaId, files) {
       );
 
       const result = await Promise.race([uploadPromise, timeoutPromise]);
-      
       uploadedFiles.push({
         name: processedFile.name,
         nombre: processedFile.name,
@@ -178,12 +178,16 @@ export async function uploadDenunciaFiles(denunciaId, files) {
         provider: 'cloudinary',
         compressed: processedFile !== file
       });
-    } catch (error) {
-      console.error(`Error al subir ${file.name}:`, error);
+    } catch (cloudError) {
+      console.error(`Cloudinary falló para ${file.name}:`, cloudError);
+      failedUploads.push({ fileName: file.name, error: cloudError.message });
     }
   }
 
-  return uploadedFiles;
+  return {
+    uploadedFiles,
+    failedUploads
+  };
 }
 
 export async function submitDenuncia(denunciaData, id = null) {
