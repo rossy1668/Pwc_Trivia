@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Leyes — Respeto Sin Excepciones | PwC Perú</title>
+  <link rel="icon" href="../assets/img/icono.png" type="image/png">
+  <link rel="stylesheet" href="../assets/css/main.css" />
+  <link rel="stylesheet" href="../assets/css/leyes.css" />
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════
+       HEADER (compartido con todas las páginas)
+  ══════════════════════════════════════ -->
+  <header id="header">
+    <div class="header-inner">
+      <div class="header-logo">
+        <!-- Reemplaza el src con el logo oficial de PwC cuando lo tengan -->
+        <img src="../assets/img/logo-pwc.png" alt="PwC Perú" />
+        <span class="header-slogan">"El silencio no protege, el conocimiento sí"</span>
+      </div>
+
+      <button class="nav-toggle" id="nav-toggle" aria-label="Abrir menú">
+        <span></span><span></span><span></span>
+      </button>
+
+      <nav id="main-nav">
+        <a href="../index.html">Inicio</a>
+        <a href="trivia.html">Trivia</a>
+        <a href="/guia">Guía</a>
+        <a href="leyes.html" class="active">Leyes</a>
+        <a href="/denuncia">Denuncia</a>
+      </nav>
+    </div>
+  </header>
+
+
+  <!-- ══════════════════════════════════════
+       HERO — Imagen con título
+  ══════════════════════════════════════ -->
+  <section id="leyes-hero">
+      <img src="../assets/img/hostigamiento.jpg" alt="Personas en una reunión profesional revisando documentos legales" style="width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;"/>
+    <h1 class="hero-title">¿Qué es el hostigamiento sexual?</h1>
+  </section>
+
+
+  <!-- ══════════════════════════════════════
+       CONTENIDO PRINCIPAL — ¿qué es el hostigamiento sexual?
+  ══════════════════════════════════════ -->
+  <section id="leyes-content">
+    <section>
+        <p> El hostigamiento sexual es una forma de violencia que ocurre cuando una persona realiza conductas de naturaleza sexual no deseadas hacia otra, afectando su dignidad, integridad y bienestar en el entorno laboral. </p>
+        <p>Estas conductas pueden provenir de un superior, compañero de trabajo o cualquier persona dentro del entorno laboral, y no dependen del consentimiento de la persona afectada.</p>
+        <br>
+        <div style="background-color:#f5f5f5; padding:15px; border-radius:10px;">
+            <h3>Ejemplos de hostigamiento sexual</h3><br>
+            <ul style="padding-left: 3%;">
+            <li>Comentarios o insinuaciones de carácter sexual</li>
+            <li>Miradas o gestos incómodos</li>
+            <li>Mensajes, llamadas o contenido inapropiado</li>
+            <li>Contacto físico no consentido</li>
+            <li>Promesas de beneficios laborales a cambio de favores sexuales</li>
+        </ul>
+        </div>
+        
+        <br>
+        <p>El hostigamiento sexual no requiere que exista contacto físico. Cualquier conducta no deseada de naturaleza sexual que genere incomodidad o afecte a la persona puede ser considerada como tal.</p>
+        <p> Reconocer estas situaciones es fundamental para poder actuar, buscar apoyo y ejercer el derecho a un entorno laboral seguro y respetuoso.</p>
+    </section>
+
+  </section>
+
+  <!-- ══════════════════════════════════════
+       FOOTER (compartido con todas las páginas)
+  ══════════════════════════════════════ -->
+  <footer id="footer">
+    <div class="footer-grid">
+
+      <div class="footer-col">
+        <h4>Navegación</h4>
+        <ul>
+          <li><a href="../index.html">Inicio</a></li>
+          <li><a href="trivia.html">Trivia</a></li>
+          <li><a href="/guia">Guía de acción</a></li>
+          <li><a href="leyes.html">Leyes</a></li>
+          <li><a href="/denuncia">Denuncia</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Sobre el proyecto</h4>
+        <ul>
+          <li><a href="acercade.html">Acerca de este micrositio</a></li>
+          <li><a href="hostigamiento.html">¿Qué es el hostigamiento?</a></li>
+          <li><a href="#">Política de confidencialidad</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Recursos legales</h4>
+        <ul>
+          <li><a href="#">Ley N° 27942</a></li>
+          <li><a href="#">Reglamento vigente</a></li>
+          <li><a href="#">Derechos del colaborador</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Contacto PwC</h4>
+        <ul>
+          <li><a href="#">Canal de denuncias oficial</a></li>
+          <li><a href="#">Área de Recursos Humanos</a></li>
+          <li><a href="#">Ética y Cumplimiento</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="footer-bottom">
+      © 2025 Micrositio desarrollado para PwC Perú — Hackathon +ChicasTec |
+      "El silencio no protege, el conocimiento sí."
+    </div>
+  </footer>
+
+
+  <!-- ══════════════════════════════════════
+       JS — Menu mobile + Acordeón
+  ══════════════════════════════════════ -->
+  <script>
+    // ── Menu hamburguesa (mobile) ──
+    const navToggle = document.getElementById('nav-toggle');
+    const mainNav   = document.getElementById('main-nav');
+
+    navToggle.addEventListener('click', () => {
+      mainNav.classList.toggle('open');
+    });
+
+    // ── Acordeón ──
+    const accordionBtns = document.querySelectorAll('.accordion-btn');
+
+    accordionBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const body    = btn.nextElementSibling;
+        const isOpen  = btn.classList.contains('open');
+
+        // Cierra todos los demás
+        accordionBtns.forEach(b => {
+          b.classList.remove('open');
+          b.nextElementSibling.style.maxHeight = null;
+        });
+
+        // Abre el seleccionado si estaba cerrado
+        if (!isOpen) {
+          btn.classList.add('open');
+          body.style.maxHeight = body.scrollHeight + 'px';
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Leyes — Respeto Sin Excepciones | PwC Perú</title>
+  <link rel="icon" href="../assets/img/icono.png" type="image/png">
+  <link rel="stylesheet" href="../assets/css/main.css" />
+  <link rel="stylesheet" href="../assets/css/leyes.css" />
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════
+       HEADER (compartido con todas las páginas)
+  ══════════════════════════════════════ -->
+  <header id="header">
+    <div class="header-inner">
+      <div class="header-logo">
+        <!-- Reemplaza el src con el logo oficial de PwC cuando lo tengan -->
+        <img src="../assets/img/logo-pwc.png" alt="PwC Perú" />
+        <span class="header-slogan">"El silencio no protege, el conocimiento sí"</span>
+      </div>
+
+      <button class="nav-toggle" id="nav-toggle" aria-label="Abrir menú">
+        <span></span><span></span><span></span>
+      </button>
+
+      <nav id="main-nav">
+        <a href="../index.html">Inicio</a>
+        <a href="trivia.html">Trivia</a>
+        <a href="/guia">Guía</a>
+        <a href="leyes.html" class="active">Leyes</a>
+        <a href="/denuncia">Denuncia</a>
+      </nav>
+    </div>
+  </header>
+
+
+  <!-- ══════════════════════════════════════
+       HERO — Imagen con título
+  ══════════════════════════════════════ -->
+  <section id="leyes-hero">
+      <img src="../assets/img/acerca.jpg" alt="Personas en una reunión profesional revisando documentos legales" style="width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;"/>
+    <h1 class="hero-title">Sobre este sitio</h1>
+  </section>
+
+
+  <!-- ══════════════════════════════════════
+       CONTENIDO PRINCIPAL — Acerca del micrositio
+  ══════════════════════════════════════ -->
+  <section id="leyes-content">
+    <section>
+
+  <p>
+    Este sitio ha sido diseñado como una herramienta informativa e interactiva 
+    para ayudar a las personas a reconocer, comprender y actuar frente al acoso en el entorno laboral.
+  </p>
+<br>
+  <p>
+    A través de diferentes secciones, puedes poner a prueba tus conocimientos mediante 
+    una trivia, acceder a una guía práctica sobre qué hacer ante una situación de acoso, 
+    informarse sobre la normativa vigente y conocer sus derechos.
+  </p>
+<br>
+  <p>
+    Además, el sitio ofrece un espacio para realizar denuncias de manera anónima, promoviendo 
+    un entorno seguro donde las personas puedan expresarse sin temor.
+  </p>
+<br>
+  <p>
+    Nuestro objetivo es fomentar la prevención, la información y la acción, contribuyendo 
+    a la construcción de espacios laborales más seguros, respetuosos y libres de violencia.
+  </p><br>
+</section>
+
+  </section>
+
+  <!-- ══════════════════════════════════════
+       FOOTER (compartido con todas las páginas)
+  ══════════════════════════════════════ -->
+  <footer id="footer">
+    <div class="footer-grid">
+
+      <div class="footer-col">
+        <h4>Navegación</h4>
+        <ul>
+          <li><a href="../index.html">Inicio</a></li>
+          <li><a href="trivia.html">Trivia</a></li>
+          <li><a href="/guia">Guía de acción</a></li>
+          <li><a href="leyes.html">Leyes</a></li>
+          <li><a href="/denuncia">Denuncia</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Sobre el proyecto</h4>
+        <ul>
+          <li><a href="acercade.html">Acerca de este micrositio</a></li>
+          <li><a href="hostigamiento.html">¿Qué es el hostigamiento?</a></li>
+          <li><a href="#">Política de confidencialidad</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Recursos legales</h4>
+        <ul>
+          <li><a href="#">Ley N° 27942</a></li>
+          <li><a href="#">Reglamento vigente</a></li>
+          <li><a href="#">Derechos del colaborador</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Contacto PwC</h4>
+        <ul>
+          <li><a href="#">Canal de denuncias oficial</a></li>
+          <li><a href="#">Área de Recursos Humanos</a></li>
+          <li><a href="#">Ética y Cumplimiento</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="footer-bottom">
+      © 2025 Micrositio desarrollado para PwC Perú — Hackathon +ChicasTec |
+      "El silencio no protege, el conocimiento sí."
+    </div>
+  </footer>
+
+
+  <!-- ══════════════════════════════════════
+       JS — Menu mobile + Acordeón
+  ══════════════════════════════════════ -->
+  <script>
+    // ── Menu hamburguesa (mobile) ──
+    const navToggle = document.getElementById('nav-toggle');
+    const mainNav   = document.getElementById('main-nav');
+
+    navToggle.addEventListener('click', () => {
+      mainNav.classList.toggle('open');
+    });
+
+    // ── Acordeón ──
+    const accordionBtns = document.querySelectorAll('.accordion-btn');
+
+    accordionBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const body    = btn.nextElementSibling;
+        const isOpen  = btn.classList.contains('open');
+
+        // Cierra todos los demás
+        accordionBtns.forEach(b => {
+          b.classList.remove('open');
+          b.nextElementSibling.style.maxHeight = null;
+        });
+
+        // Abre el seleccionado si estaba cerrado
+        if (!isOpen) {
+          btn.classList.add('open');
+          body.style.maxHeight = body.scrollHeight + 'px';
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
