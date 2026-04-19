@@ -118,10 +118,10 @@ const Footer = () => {
             <h4 style={styles.colTitle}>Sobre el proyecto</h4>
             <ul style={styles.list}>
               <li style={styles.listItem}>
-                <a href="/acerca" style={styles.link} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>Acerca de este micrositio</a>
+                <Link to="/acercade" style={styles.link} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>Acerca de este micrositio</Link>
               </li>
               <li style={styles.listItem}>
-                <a href="/que-es-hostigamiento" style={styles.link} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>¿Qué es el hostigamiento?</a>
+                <Link to="/hostigamiento" style={styles.link} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>¿Qué es el hostigamiento?</Link>
               </li>
               <li style={styles.listItem}>
                 <a href="/politica-confidencialidad" style={styles.link} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>Política de confidencialidad</a>

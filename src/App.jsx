@@ -6,6 +6,8 @@ import Guia from "./pages/Guia";
 import Leyes from "./pages/Leyes";
 import Denuncia from "./pages/Denuncia";
 import Login from "./pages/Login";
+import AcercaDe from "./pages/AcercaDe";
+import Hostigamiento from "./pages/Hostigamiento";
 import Footer from "./components/Footer";
 import { auth, signOutUser } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
@@ -104,6 +106,8 @@ function AppRoutes() {
           <Route path="/trivia" element={<Trivia />} />
           <Route path="/guia" element={<Guia />} />
           <Route path="/leyes" element={<Leyes />} />
+          <Route path="/acercade" element={<AcercaDe />} />
+          <Route path="/hostigamiento" element={<Hostigamiento />} />
           <Route path="/denuncia" element={<Denuncia user={user} />} />
           <Route path="/login" element={user ? <Navigate to="/home" replace /> : <Login />} />
         </Routes>

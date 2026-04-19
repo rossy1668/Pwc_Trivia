@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { getTriviaStatistics } from "../firebase";
+import { getTriviaStatistics, db } from "../firebase";
+import { collection, query, orderBy, getDocs } from "firebase/firestore";
 import "../assets/css/trivia.css";
 
 export default function AnalyticsDashboard() {
   const [statistics, setStatistics] = useState(null);
+  const [denuncias, setDenuncias] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const loadStatistics = useCallback(async () => {
@@ -19,6 +21,7 @@ export default function AnalyticsDashboard() {
 
   useEffect(() => {
     loadStatistics();
+    fetchDenuncias();
   }, [loadStatistics]);
 
   const calculateStats = (results) => {
@@ -65,7 +68,15 @@ export default function AnalyticsDashboard() {
     };
   };
 
-  if (loading) {
+  const fetchDenuncias = async () => {
+    try {
+      const querySnapshot = await getDocs(query(collection(db, 'denuncias'), orderBy('timestamp', 'desc')));
+      const denunciasData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setDenuncias(denunciasData);
+    } catch (error) {
+      console.error('Error fetching denuncias:', error);
+    }
+  };
     return (
       <div className="trivia-container">
         <div className="trivia-header">
@@ -188,6 +199,49 @@ export default function AnalyticsDashboard() {
               Continúa promoviendo la educación preventiva en hostigamiento sexual laboral.
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Lista de Denuncias */}
+      <div className="denuncias-section">
+        <h2>Lista de Denuncias</h2>
+        <div className="denuncias-list">
+          {denuncias.length > 0 ? (
+            denuncias.map((denuncia) => (
+              <div key={denuncia.id} className="denuncia-item">
+                <div className="denuncia-header">
+                  <h3>Denuncia #{denuncia.id.slice(-6)}</h3>
+                  <span className="denuncia-tipo">{denuncia.tipo || 'Tipo no especificado'}</span>
+                </div>
+                <div className="denuncia-content">
+                  <p><strong>Descripción:</strong> {denuncia.descripcion || 'Sin descripción'}</p>
+                  {denuncia.anonima !== undefined && (
+                    <p><strong>Anónima:</strong> {denuncia.anonima ? 'Sí' : 'No'}</p>
+                  )}
+                  {denuncia.nombre && <p><strong>Nombre:</strong> {denuncia.nombre}</p>}
+                  {denuncia.email && <p><strong>Email:</strong> {denuncia.email}</p>}
+                  {denuncia.telefono && <p><strong>Teléfono:</strong> {denuncia.telefono}</p>}
+                  <p><strong>Fecha:</strong> {denuncia.timestamp?.toDate?.()?.toLocaleString() || 'Fecha no disponible'}</p>
+                  {denuncia.archivos && denuncia.archivos.length > 0 && (
+                    <div className="archivos">
+                      <strong>Archivos adjuntos:</strong>
+                      <ul>
+                        {denuncia.archivos.map((archivo, index) => (
+                          <li key={index}>
+                            <a href={archivo.url} target="_blank" rel="noopener noreferrer">
+                              {archivo.nombre || `Archivo ${index + 1}`}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))
+          ) : (
+            <p>No hay denuncias registradas.</p>
+          )}
         </div>
       </div>
 
