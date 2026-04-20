@@ -143,6 +143,36 @@
   color: #ffffff;
 }
 
+.feedback-header {
+  font-weight: 600;
+  margin-bottom: 12px;
+  font-size: 1rem;
+}
+
+.feedback-explanation {
+  background: rgba(255,255,255,0.08);
+  border-left: 4px solid rgba(255,255,255,0.5);
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin-top: 12px;
+}
+
+.feedback-explanation h4 {
+  margin: 0 0 8px 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ffffff;
+  font-family: var(--font-body);
+}
+
+.feedback-explanation p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.95);
+  font-family: var(--font-body);
+}
+
 #btn-siguiente {
   display: none;
   margin: 24px auto 0;
