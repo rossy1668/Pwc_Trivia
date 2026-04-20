@@ -110,6 +110,13 @@ async function uploadToCloudinary(file, denunciaId) {
   const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dv6ylz7kg';
   const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'Trivia_PWC';
 
+  console.log('🔍 Cloudinary Config:', {
+    cloudName,
+    uploadPreset,
+    envCloudName: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME,
+    envUploadPreset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
+  });
+
   const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
   const formData = new FormData();
 
