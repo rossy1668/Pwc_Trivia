@@ -61,7 +61,8 @@ export default function Denuncia({ user }) {
   const approvedHrEmails = [
     "rrhh@pwc.com",
     "rh@pwc.com",
-    "rh@empresa.com"
+    "rh@empresa.com",
+    "admin@pwc.com"
   ];
 
   const isHrUser = user?.email ? approvedHrEmails.includes(user.email.toLowerCase()) : false;
