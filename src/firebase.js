@@ -9,7 +9,6 @@ import {
   updateProfile
 } from "firebase/auth";
 import { getFirestore, collection, doc, setDoc, serverTimestamp, query, where, getDocs } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCmKuHHsxJRss0n7J4z5SxEgof2Syabuog",
@@ -24,7 +23,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-export const storage = getStorage(app);
 export const googleProvider = new GoogleAuthProvider();
 
 // --- AUTH FUNCTIONS ---
@@ -109,12 +107,8 @@ async function compressImage(file, maxWidth = 800, maxHeight = 800, quality = 0.
 
 async function uploadToCloudinary(file, denunciaId) {
   // Asegúrate de tener estas variables en tu archivo .env
-  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-  const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
-
-  if (!cloudName || !uploadPreset) {
-    throw new Error('Faltan credenciales de Cloudinary en variables de entorno.');
-  }
+  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dvy6lz7kg';
+  const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'Trivia_PWC';
 
   const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
   const formData = new FormData();
