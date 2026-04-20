@@ -7,4 +7,14 @@ const isGithubPages = process.env.GH_PAGES === 'true'
 export default defineConfig({
   plugins: [react()],
   base: isGithubPages ? '/Pwc_Trivia/' : '/',
+  build: {
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+        }
+      }
+    }
+  }
 })
