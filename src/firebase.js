@@ -107,7 +107,7 @@ async function compressImage(file, maxWidth = 800, maxHeight = 800, quality = 0.
 
 async function uploadToCloudinary(file, denunciaId) {
   // Asegúrate de tener estas variables en tu archivo .env
-  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dvy6lz7kg';
+  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dv6ylz7kg';
   const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'Trivia_PWC';
 
   const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
